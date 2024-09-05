@@ -1,37 +1,81 @@
-class Vowel {
-	constructor(ipa, formants) {
-		this.ipa = ipa;
-		this.formants = formants;
-	}
-
-	play(ctx, duration) {
-		for (const ffreq of this.formants) {
-			let osc = ctx.createOscillator();
-			osc.type = "sine";
-			osc.frequency.value = ffreq;
-			osc.connect(ctx.destination);
-			osc.start();
-			osc.stop(ctx.currentTime + 1);
-		}
-	}
+class Formant {
+    /**
+     * Formant bandpass filter configuration
+     * freq: center frequency (Hz)
+     * amp: amplitude (dB)
+     * bw: bandwidth (Hz)
+     * TODO: are these actually the units that BiquadFilters use?
+     */
+    constructor(freq, amp, bw) {
+        this.freq = freq;
+        this.amp = amp;
+        this.bw = bw;
+    }
 }
 
-export const VOWELS = new Map([
-	// as per table on https://en.wikipedia.org/wiki/Formant
-	["i", new Vowel("i", [240, 2400])],
-	["y", new Vowel("y", [235, 2100])],
-	["e", new Vowel("e", [390, 2300])],
-	["ø", new Vowel("ø", [370, 1900])],
-	["ɛ", new Vowel("ɛ", [610, 1900])],
-	["œ", new Vowel("œ", [585, 1710])],
-	["a", new Vowel("a", [850, 1610])],
-	["ɶ", new Vowel("ɶ", [820, 1530])],
-	["ɑ", new Vowel("ɑ", [750, 940])],
-	["ɒ", new Vowel("ɒ", [700, 760])],
-	["ʌ", new Vowel("ʌ", [600, 1170])],
-	["ɔ", new Vowel("ɔ", [500, 700])],
-	["ɤ", new Vowel("ɤ", [460, 1310])],
-	["o", new Vowel("o", [360, 640])],
-	["ɯ", new Vowel("ɯ", [300, 1390])],
-	["u", new Vowel("u", [250, 595])],
-]);
+const FUNDAMENTAL = 80;  // Hz
+
+class Vowel {
+    constructor(formants) {
+        this.formants = formants;
+    }
+
+    play(ctx, duration = 1) {
+        let osc = ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.value = FUNDAMENTAL;
+
+        for (const formant of this.formants) {
+            let filter = ctx.createBiquadFilter();
+
+            filter.type = 'bandpass';
+            filter.frequency.value = formant.freq;
+            filter.gain.value = formant.amp;
+            filter.Q.value = formant.bw;
+
+            osc.connect(filter);
+            filter.connect(ctx.destination);
+        }
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+    }
+}
+
+export const VOWELS = {
+    a: new Vowel([
+        new Formant(600, 0, 60),
+        new Formant(1040, -7, 70),
+        new Formant(2250, -9, 110),
+        new Formant(2450, -9, 120),
+        new Formant(2750, -20, 130)
+    ]),
+    e: new Vowel([
+        new Formant(400, 0, 40),
+        new Formant(1620, -12, 80),
+        new Formant(2400, -9, 100),
+        new Formant(2800, -12, 120),
+        new Formant(3100, -18, 120)
+    ]),
+    i: new Vowel([
+        new Formant(250, 0, 60),
+        new Formant(1750, -30, 90),
+        new Formant(2600, -16, 100),
+        new Formant(3050, -22, 120),
+        new Formant(3340, -28, 120)
+    ]),
+    o: new Vowel([
+        new Formant(400, 0, 40),
+        new Formant(750, -11, 80),
+        new Formant(2400, -21, 100),
+        new Formant(2600, -20, 120),
+        new Formant(2900, -40, 120)
+    ]),
+    u: new Vowel([
+        new Formant(350, 0, 40),
+        new Formant(600, -20, 80),
+        new Formant(2400, -32, 100),
+        new Formant(2675, -28, 120),
+        new Formant(2950, -36, 120)
+    ])
+};
