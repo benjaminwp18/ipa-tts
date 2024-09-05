@@ -5,11 +5,20 @@ class Vowel {
 	}
 
 	play(ctx, duration) {
+		let poo = ctx.createOscillator();
+		poo.type = "sawtooth";
+		poo.frequency.value = 100;
+		poo.connect(ctx.destination);
+		poo.start();
+		poo.stop(ctx.currentTime + 1);
 		for (const ffreq of this.formants) {
 			let osc = ctx.createOscillator();
 			osc.type = "sine";
 			osc.frequency.value = ffreq;
-			osc.connect(ctx.destination);
+			let gain = ctx.createGain();
+			gain.gain.value = -0.5;
+			osc.connect(gain);
+			gain.connect(ctx.destination);
 			osc.start();
 			osc.stop(ctx.currentTime + 1);
 		}
@@ -18,7 +27,7 @@ class Vowel {
 
 export const VOWELS = new Map([
 	// as per table on https://en.wikipedia.org/wiki/Formant
-	["i", new Vowel("i", [240, 2400])],
+	["i", new Vowel("i", [240, 2400, 3000])],
 	["y", new Vowel("y", [235, 2100])],
 	["e", new Vowel("e", [390, 2300])],
 	["ø", new Vowel("ø", [370, 1900])],
@@ -28,7 +37,7 @@ export const VOWELS = new Map([
 	["ɶ", new Vowel("ɶ", [820, 1530])],
 	["ɑ", new Vowel("ɑ", [750, 940])],
 	["ɒ", new Vowel("ɒ", [700, 760])],
-	["ʌ", new Vowel("ʌ", [600, 1170])],
+	["ʌ", new Vowel("ʌ", [600, 1170, 2400])],
 	["ɔ", new Vowel("ɔ", [500, 700])],
 	["ɤ", new Vowel("ɤ", [460, 1310])],
 	["o", new Vowel("o", [360, 640])],
