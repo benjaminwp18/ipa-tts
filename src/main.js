@@ -1,6 +1,10 @@
 import { VOWELS } from "./sound.js";
 
 export function main() {
+
+	//Activate initial keyboard tab
+	document.getElementById("V").style.display = "block";
+
 	let ctx = new AudioContext();
 
 	for (const vow of VOWELS.values()) {
@@ -9,6 +13,6 @@ export function main() {
 		b.addEventListener("click", function() {
 			vow.play(ctx, 1);
 		});
-		document.body.appendChild(b);
+		document.getElementById("sounds").appendChild(b);
 	}
 }

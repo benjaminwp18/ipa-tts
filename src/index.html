@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>[ˈsinjɚ ˈpɹɑʤɛkt]</title>
+		<link rel="stylesheet" href="./keyboard-style.css">
 	</head>
 
 	<body>
@@ -15,5 +16,28 @@
 				alert(`Exception (check console): ${e.toString()}`);
 			}
 		</script>
+		<div id="sounds"></div>
+		<div id="keyboard-area">
+			<script src="keyboard.js"></script>
+			<!-- Tab links -->
+			<div class="tab">
+				<button class="tablinks" onclick="openTab(event, 'V')">Vowels</button>
+				<button class="tablinks" onclick="openTab(event, 'C1')">Consonants 1</button>
+				<button class="tablinks" onclick="openTab(event, 'C2')">Consonants 2</button>
+			</div>
+
+			<!-- Tab content -->
+			<div id="V" class="tabcontent">
+				Vowel Keyboard
+			</div>
+
+			<div id="C1" class="tabcontent">
+				Consonant keyboard 1
+			</div>
+
+			<div id="C2" class="tabcontent">
+				consonant keyboard 2
+			</div>
+		</div>
 	</body>
 </html>
