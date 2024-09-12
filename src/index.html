@@ -21,6 +21,26 @@
             <button id="search-button" style="background-color: rgb(13, 110, 253); color: white;">Search</button>
         </div>
         <div>
+            <label for="ipa-to-sound">IPA to Sound</label>
+        </div>
+        <div>
+            <input placeholder="Enter IPA" id="ipa-text"/>
+            <div class = "sliders">
+                 <div>
+                    <label for="speed-slider">Playback Speed</label>
+                </div>
+                <div class="speed-slider">
+                    <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+                </div>
+                <div>
+                    <label for="pitch-slider">Pitch</label>
+                </div>
+                <div class="pitch-slider">
+                    <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+                </div>
+            </div>
+        </div>
+        <div>
             <button id="init-button">Initialize context! (grrr user action requirements)</button>
         </div>
         <script type="module">
