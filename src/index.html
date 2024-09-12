@@ -8,6 +8,7 @@
     </head>
 
     <body>
+        <div class = "container">
         <div>
             <label for="language-lookup">IPA Dictionary Lookup</label>
         </div>
@@ -22,29 +23,35 @@
             <input placeholder="Enter text" id="text"/>
             <button id="search-button" style="background-color: rgb(13, 110, 253); color: white;">Search</button>
         </div>
-        <div>
-            <label for="ipa-to-sound">IPA to Sound</label>
-        </div>
-        <div>
-            <input placeholder="Enter IPA" id="ipa-text"/>
-            <div class = "sliders">
-                 <div>
+        <br>
+        <!-- Flex container for IPA input and sliders -->
+        <div class = "ipa-sliders">
+            <div class = "ipa-input">
+                <label for="ipa-to-sound">IPA to Sound</label>
+                <input placeholder="Enter IPA" id="ipa-text"/>
+            </div>
+            <div>
+                <div>
                     <label for="speed-slider">Playback Speed</label>
                 </div>
-                <div class="speed-slider">
+                <div>
                     <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
                 </div>
                 <div>
                     <label for="pitch-slider">Pitch</label>
                 </div>
-                <div class="pitch-slider">
+                <div>
                     <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
                 </div>
+            </div>
+            <div>
+                <button id="make-sound-button" style="background-color: rgb(13, 110, 253); color: white;">Make Sound</button>
             </div>
         </div>
         <div>
             <button id="init-button">Initialize context! (grrr user action requirements)</button>
         </div>
+    </div>
         <script type="module">
             import { main } from "./main.js";
             document.getElementById('init-button').addEventListener('click', main);

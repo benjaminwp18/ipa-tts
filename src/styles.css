@@ -1,0 +1,30 @@
+/* Body styles */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    height: 100vh; /* Full viewport height */
+}
+
+/* Main container to wrap content */
+.container {
+    max-width: 600px;
+    width: 100%; /* Ensure the container doesn't stretch too wide */
+    text-align: left; /* Ensure all content is left-aligned inside the container */
+}
+
+/* Flex container to keep the IPA input and sliders in the same row */
+.ipa-sliders {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px; /* Space between elements */
+    width: 100%;
+}
+
+/* Stack label and input in a vertical column */
+.ipa-input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+}
