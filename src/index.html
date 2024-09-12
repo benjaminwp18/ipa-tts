@@ -7,6 +7,7 @@
 	</head>
 
 	<body>
+		<div id="sounds"></div>
 		<script type="module">
 			import { main } from "./main.js";
 			try {
@@ -16,9 +17,10 @@
 				alert(`Exception (check console): ${e.toString()}`);
 			}
 		</script>
-		<div id="sounds"></div>
+
+		<textarea id="keyboard-linked"></textarea>
 		<div id="keyboard-area">
-			<script src="keyboard.js"></script>
+
 			<!-- Tab links -->
 			<div class="tab">
 				<button class="tablinks" onclick="openTab(event, 'V')">Vowels</button>
@@ -28,7 +30,99 @@
 
 			<!-- Tab content -->
 			<div id="V" class="tabcontent">
-				Vowel Keyboard
+				<table class="key-table"><thead>
+				<tr>
+					<th></th>
+					<th colspan="3">Front</th>
+					<th colspan="3">Central</th>
+					<th colspan="3">Back</th>
+				</tr></thead>
+					<tbody>
+					<tr>
+						<td>Close</td>
+						<td><button class="key">i</button></td>
+						<td>y</td>
+						<td></td>
+						<td>ɨ</td>
+						<td>ʉ</td>
+						<td></td>
+						<td></td>
+						<td>ɯ</td>
+						<td>u</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td>ɪ</td>
+						<td>ʏ</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>ʊ</td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>Close-Mid</td>
+						<td></td>
+						<td>e</td>
+						<td>ø</td>
+						<td></td>
+						<td>ɘ</td>
+						<td>ɵ</td>
+						<td></td>
+						<td>ɤ</td>
+						<td>o</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>ə</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>Open-Mid</td>
+						<td></td>
+						<td></td>
+						<td>ɛ</td>
+						<td>œ</td>
+						<td>ɜ</td>
+						<td>ɞ</td>
+						<td></td>
+						<td>ʌ</td>
+						<td>ɔ</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>æ</td>
+						<td></td>
+						<td>ɐ</td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>Open</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>a</td>
+						<td>Œ</td>
+						<td></td>
+						<td>ɑ</td>
+						<td>ɒ</td>
+					</tr>
+					</tbody></table>
 			</div>
 
 			<div id="C1" class="tabcontent">
@@ -39,5 +133,6 @@
 				consonant keyboard 2
 			</div>
 		</div>
+		<script src="./keyboard.js"></script>
 	</body>
 </html>
