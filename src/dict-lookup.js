@@ -49,7 +49,18 @@ function findEntries(phrase) {
     return entries;
 }
 
-async function translateIpa(phrase, lang) {
+/**
+ * Attempts to translates the phrase in the given language using an online IPA dict
+ * (https://github.com/open-dict-data/ipa-dict)
+ * @param   {string} phrase    A phrase to be translated
+ * @param   {string} lang      The language code (e.g. en_US, fr_FR, de)
+ * @returns {Promise<Object>}  Contains status and relevant details
+ *   - status (string)                   SUCCESS, NOT_FOUND, NO_VALID_WORD, or HTTP_ERROR
+ *   - ipas (Array<string>, optional)    Translated words if SUCCESS
+ *   - words (Array<string>, optional)   Words not found if NOT_FOUND
+ *   - details (string, optional)        Error message if HTTP_ERROR
+ */
+export async function translateIpa(phrase, lang) {
     if (!currentDict || currentLang !== lang) {
         try {
             await loadDict(lang);
@@ -76,7 +87,7 @@ async function translateIpa(phrase, lang) {
     } else {
         return {
             status: 'SUCCESS',
-            words: entries.map(entry => entry.ipa)
+            ipas: entries.map(entry => entry.ipa)
         }
     }
 }
