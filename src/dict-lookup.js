@@ -1,3 +1,7 @@
+// \p{L} matches any letter from any language
+// \p{M} matches character intended to be combined with another char (e.g. accents)
+const NON_ALPHANUM_REGEX = /[^\p{L}|\p{M}|\d]+/ugm;
+
 let currentLang;
 let currentDict;
 
@@ -22,11 +26,40 @@ async function loadDict(lang) {
     currentDict = parseDict(text);
 }
 
-async function findWord(wordToFind, lang) {
+function findEntries(phrase) {
+    const formattedPhrase = phrase.trim().toLowerCase();
+
+    // first try entire phrase
+    const entry = currentDict.find(e => e.word === formattedPhrase);
+    if (entry)
+        return [entry];
+
+    // if that doesn't work, try splitting phrase
+    const words = formattedPhrase.split(NON_ALPHANUM_REGEX);
+    if (words.length > 1) {
+        let entries = [];
+        words.forEach(word => {
+            const entry = currentDict.find(e => e.word === word);
+            entry ? entries.push(entry) : entries.push({ word: word, ipa: null });
+        });
+        return entries;
+    }
+
+    return [{ word: phrase, ipa: null }];
+}
+
+async function translateIpa(phrase, lang) {
     if (!currentDict || currentLang !== lang) {
         await loadDict(lang);
         currentLang = lang;
     }
-    const entry = currentDict.find(entry => entry.word === wordToFind);
-    return entry;
+
+    const entries = await findEntries(phrase, lang);
+    const wordsNotFound = entries.filter(entry => entry.ipa === null).map(entry => entry.word);
+    if (wordsNotFound.length > 0) {
+        return `The following word(s) were not found: ${wordsNotFound.join(', ')}`;
+    }
+    else {
+        return entries.map(entry => entry.ipa).join(' ');
+    }
 }
