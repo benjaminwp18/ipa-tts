@@ -35,3 +35,14 @@
 .key-table {
     width: 100%;
 }
+
+.key {
+    border-radius: 4px;
+    border: none;
+    height: 45px;
+    width: 45px;
+}
+
+.diacritic {
+    font-size: x-large;
+}

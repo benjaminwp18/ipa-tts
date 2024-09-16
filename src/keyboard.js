@@ -11,7 +11,6 @@ function keyType(evt){
     let content = linkedTextArea.value;
     content += evt.currentTarget.innerText;
     linkedTextArea.value = content;
-    window.alert("Typed")
 }
 
 //function used by buttons controlling tabbed interface for keyboard
