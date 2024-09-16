@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>[ˈsinjɚ ˈpɹɑʤɛkt]</title>
-		<link rel="stylesheet" href="./keyboard-style.css">
-	</head>
 
-	<body>
-		<div id="sounds"></div>
-		<script type="module">
-			import { main } from "./main.js";
-			try {
-				main();
-			} catch (e) {
-				console.error(e);
-				alert(`Exception (check console): ${e.toString()}`);
-			}
-		</script>
+  <head>
+    <meta charset="utf-8">
+    <title>[ˈsinjɚ ˈpɹɑʤɛkt]</title>
+  </head>
+
+ <body>
+    <button id="init-button">Initialize context! (grrr user action requirements)</button>
+    <script type="module">
+        import { main } from "./main.js";
+        document.getElementById('init-button').addEventListener('click', main);
+    </script>
 
 		<input id="keyboard-linked">
 		<div id="keyboard-area">
