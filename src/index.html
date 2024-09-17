@@ -3,8 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>[ˈsinjɚ ˈpɹɑʤɛkt]</title>
-        <!-- Link to external CSS file -->
-        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" type="text/css" href="keyboard-style.css">
     </head>
 
     <body>
@@ -56,5 +55,159 @@
             import { main } from "./main.js";
             document.getElementById('init-button').addEventListener('click', main);
         </script>
+
+        <input id="keyboard-linked">
+        <div id="keyboard-area">
+
+            <!-- Tab links -->
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'V')">Vowels</button>
+                <button class="tablinks" onclick="openTab(event, 'C1')">Consonants 1</button>
+                <button class="tablinks" onclick="openTab(event, 'C2')">Consonants 2</button>
+                <button class="tablinks" onclick="openTab(event, 'misc')">Misc.</button>
+                <button class="tablinks" onclick="openTab(event, 'keyboard-info')">Info</button>
+            </div>
+
+            <!-- Tab content -->
+            <div id="V" class="tabcontent open">
+                <table class="key-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th colspan="3">Front</th>
+                            <th colspan="3">Central</th>
+                            <th colspan="3">Back</th>
+                            <th></th>
+                            <th colspan="2">Diacritics</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Close</td>
+                            <td><button class="key">i</button></td>
+                            <td><button class="key">y</button></td>
+                            <td></td>
+                            <td><button class="key">ɨ</button></td>
+                            <td><button class="key">ʉ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ɯ</button></td>
+                            <td><button class="key">u</button></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x0303</button></td>
+                            <td><button class="key diacritic">&#x02DE</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ɪ</button></td>
+                            <td><button class="key">ʏ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ʊ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x032F</button></td>
+                            <td><button class="key diacritic">&#x02D0</button></td>
+                        </tr>
+                        <tr>
+                            <td>Close-Mid</td>
+                            <td></td>
+                            <td><button class="key">e</button></td>
+                            <td><button class="key">ø</button></td>
+                            <td></td>
+                            <td><button class="key">ɘ</button></td>
+                            <td><button class="key">ɵ</button></td>
+                            <td></td>
+                            <td><button class="key">ɤ</button></td>
+                            <td><button class="key">o</button></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x0339</button></td>
+                            <td><button class="key diacritic">&#x031C</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ə</button></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x031F</button></td>
+                            <td><button class="key diacritic">&#x0320</button></td>
+                        </tr>
+                        <tr>
+                            <td>Open-Mid</td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ɛ</button></td>
+                            <td><button class="key">œ</button></td>
+                            <td><button class="key">ɜ</button></td>
+                            <td><button class="key">ɞ</button></td>
+                            <td></td>
+                            <td><button class="key">ʌ</button></td>
+                            <td><button class="key">ɔ</button></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x0308</button></td>
+                            <td><button class="key diacritic">&#x033D</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">æ</button></td>
+                            <td></td>
+                            <td><button class="key">ɐ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x031D</button></td>
+                            <td><button class="key diacritic">&#x031E</button></td>
+                        </tr>
+                        <tr>
+                            <td>Open</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">a</button></td>
+                            <td><button class="key">ɶ</button></td>
+                            <td></td>
+                            <td><button class="key">ɑ</button></td>
+                            <td><button class="key">ɒ</button></td>
+                            <td></td>
+                            <td><button class="key diacritic">&#x0318</button></td>
+                            <td><button class="key diacritic">&#x0319</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="C1" class="tabcontent">
+                Consonant keyboard 1
+            </div>
+
+            <div id="C2" class="tabcontent">
+                consonant keyboard 2
+            </div>
+
+            <div id="misc" class="tabcontent">
+                Misc keyboard
+            </div>
+
+            <div id="keyboard-info" class="tabcontent">
+                To type a character with a diacritic, simply press the button for the character then press the button
+                for the diacritic mark. e.g. to type a&#x0307, press the a button then press the overdot button.
+            </div>
+        </div>
+        <script src="./keyboard.js"></script>
     </body>
 </html>
