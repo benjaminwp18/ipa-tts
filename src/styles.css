@@ -2,7 +2,6 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex;
     justify-content: center; /* Center the content horizontally */
     height: 100vh; /* Full viewport height */
 }

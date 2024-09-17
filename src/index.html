@@ -3,7 +3,12 @@
     <head>
         <meta charset="utf-8">
         <title>[ˈsinjɚ ˈpɹɑʤɛkt]</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
+        <script type="module">
+            import { main } from "./main.js";
+            document.getElementById('init-button').addEventListener('click', main);
+        </script>
     </head>
 
     <body>
@@ -51,11 +56,6 @@
             <button id="init-button">Initialize context! (grrr user action requirements)</button>
         </div>
     </div>
-        <script type="module">
-            import { main } from "./main.js";
-            document.getElementById('init-button').addEventListener('click', main);
-        </script>
-
         <input id="keyboard-linked">
         <div id="keyboard-area">
 
