@@ -18,7 +18,8 @@ body {
 .ipa-sliders {
     display: flex;
     justify-content: flex-start;
-    gap: 10px; /* Space between elements */
+    align-items: center; /* Align content vertically centered */
+    gap: 20px; /* Space between elements */
     width: 100%;
 }
 
@@ -27,4 +28,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px; /* Space between label and input */
+}
+
+#make-sound-button {
+    align-self: center; /* Center it vertically */
+    margin-top: 0;
 }
