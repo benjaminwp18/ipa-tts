@@ -13,6 +13,6 @@ export function main() {
 		button.addEventListener("click", function() {
 			vowel.play(ctx, 1);
 		});
-    document.body.appendChild(button);
+		document.body.appendChild(button);
 	}
 }
