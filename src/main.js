@@ -1,5 +1,7 @@
 import { VOWELS } from "./sound.js";
 
+const soundTestingArea = document.getElementById('sound-testing-area');
+
 export function main() {
 
 	//Activate initial keyboard tab
@@ -13,6 +15,6 @@ export function main() {
 		button.addEventListener("click", function() {
 			vowel.play(ctx, 1);
 		});
-		document.body.appendChild(button);
+		soundTestingArea.appendChild(button);
 	}
 }
