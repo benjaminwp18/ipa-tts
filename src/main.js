@@ -3,6 +3,10 @@ import { VOWELS } from "./sound.js";
 const soundTestingArea = document.getElementById('sound-testing-area');
 
 export function main() {
+
+	//Activate initial keyboard tab
+	document.getElementById("V").style.display = "block";
+
 	let ctx = new AudioContext();
 
 	for (const [ipa, vowel] of Object.entries(VOWELS)) {
