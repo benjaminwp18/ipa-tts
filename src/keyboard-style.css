@@ -1,4 +1,3 @@
-/* Style the tab */
 .tab {
     overflow: hidden;
     border: 1px solid #ccc;
@@ -12,7 +11,7 @@
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
-    transition: 0.3s;
+    transition: background-color 0.3s;
     border-radius: 4px;
 }
 
@@ -30,6 +29,10 @@
     border: 1px solid #ccc;
     border-top: none;
     text-align: center;
+}
+
+.tabcontent.open {
+    display: block;
 }
 
 .key-table {
