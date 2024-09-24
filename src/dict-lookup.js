@@ -15,7 +15,9 @@ function parseDict(text) {
         const columns = row.split('\t');
         return {
             word: columns[0],
-            ipa: columns[1].split(',')[0] // use first provided IPA
+            ipa: columns[1]
+                .split(',')[0] // use first provided IPA
+                .replace(/^\/+|\/+$/g, '') // remove slashes
         };
     });
 }
