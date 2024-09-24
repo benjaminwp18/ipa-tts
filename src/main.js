@@ -10,7 +10,8 @@ export function main() {
 	let soundButton = document.getElementById("make-sound-button");
 	let ipaTextField = document.getElementById("ipa-text");
 
-	soundButton.addEventListener("click", function() {
+	soundButton.addEventListener("click", function (e) {
+		e.preventDefault();
 		playWord(ctx, ipaTextField.value);
 	});
 }
