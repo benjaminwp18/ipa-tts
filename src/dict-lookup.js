@@ -1,6 +1,6 @@
 // \p{L} matches any letter from any language
 // \p{M} matches character intended to be combined with another char (e.g. accents)
-const NON_ALPHANUM_REGEX = /[^\p{L}|\p{M}]+/ugm; // TODO: include hyphen? apostrophe?
+const NON_ALPHABET_REGEX = /[^\p{L}|\p{M}]+/ugm; // TODO: include hyphen? apostrophe?
 
 let currentLang;
 let currentDict;
@@ -15,7 +15,9 @@ function parseDict(text) {
         const columns = row.split('\t');
         return {
             word: columns[0],
-            ipa: columns[1].split(',')[0] // use first provided IPA
+            ipa: columns[1]
+                .split(',')[0] // use first provided IPA
+                .replace(/^\/+|\/+$/g, '') // remove slashes
         };
     });
 }
@@ -39,7 +41,7 @@ function findEntries(phrase) {
 
     // if that doesn't work, try splitting phrase
     const words = formattedPhrase
-        .split(NON_ALPHANUM_REGEX)
+        .split(NON_ALPHABET_REGEX)
         .filter(Boolean); // remove empty strings
     let entries = [];
     words.forEach(word => {

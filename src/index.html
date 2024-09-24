@@ -13,48 +13,51 @@
     </head>
 
     <body>
-        <div class = "container">
-            <div class = "ipa-lookup-container">
-                <div>
-                    <label for="language-lookup"> IPA Dictionary Lookup</label>
+        <div class="container">
+            <form id="ipa-lookup-form">
+                <div class="ipa-lookup-container">
+                    <div>
+                        <label for="language-lookup"> IPA Dictionary Lookup</label>
+                    </div>
+                    <div>
+                        <select name="select-language" id="language-selection">
+                        <option value="default">Select Language</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input placeholder="Enter text" id="text"/>
+                        <button type="submit" id="search-button" style="background-color: rgb(13, 110, 253); color: white;">Search</button>
+                    </div>
+                    <div id="language-selection-warning" style="color: red"></div>
                 </div>
-                <div>
-                    <select name="select-language" id="language-selection">
-                    <option value="default">Select Language</option>
-                    <option value="english">English</option>
-                    <option value="german">German</option>
-                    </select>
-                </div>
-                <div>
-                    <input placeholder="Enter text" id="text"/>
-                    <button id="search-button" style="background-color: rgb(13, 110, 253); color: white;">Search</button>
-                </div>
-            </div>
+            </form>
             <br>
             <!-- Flex container for IPA input and sliders -->
-            <div class = "ipa-sliders">
-                <div class = "ipa-input">
-                    <label for="ipa-to-sound">IPA to Sound</label>
-                    <input placeholder="Enter IPA" id="ipa-text"/>
+            <form id="ipa-input">
+                <div class="ipa-sliders">
+                    <div class="ipa-input">
+                        <label for="ipa-to-sound">IPA to Sound</label>
+                        <input placeholder="Enter IPA" id="ipa-text"/>
+                    </div>
+                    <div>
+                        <div>
+                            <label for="speed-slider">Playback Speed</label>
+                        </div>
+                        <div>
+                            <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
+                        </div>
+                        <div>
+                            <label for="pitch-slider">Pitch</label>
+                        </div>
+                        <div>
+                            <input type="range" min="1" max="100" value="50" class="slider" id="pitchRange">
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" id="make-sound-button" style="background-color: rgb(13, 110, 253); color: white;">Make Sound</button>
+                    </div>
                 </div>
-                <div>
-                    <div>
-                        <label for="speed-slider">Playback Speed</label>
-                    </div>
-                    <div>
-                        <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
-                    </div>
-                    <div>
-                        <label for="pitch-slider">Pitch</label>
-                    </div>
-                    <div>
-                        <input type="range" min="1" max="100" value="50" class="slider" id="pitchRange">
-                    </div>
-                </div>
-                <div>
-                    <button id="make-sound-button" style="background-color: rgb(13, 110, 253); color: white;">Make Sound</button>
-                </div>
-            </div>
+            </form>
             <button id="init-button">Initialize context! (grrr user action requirements)</button>
         </div>
         <input id="keyboard-linked">
@@ -210,5 +213,6 @@
             </div>
         </div>
         <script src="./keyboard.js"></script>
+        <script src="./dict-form.js" type="module"></script>
     </body>
 </html>
