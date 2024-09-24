@@ -29,7 +29,8 @@ const SUPPORTED_LANGUAGES = {
     "vi_N":     "Vietnamese (Northern)",
     "vi_S":     "Vietnamese (Southern)",
     "yue":      "Cantonese",
-    "zh":       "Mandarin"
+    "zh_hans":  "Mandarin (Simplified)",
+    "zh_hant":  "Mandarin (Traditional)"
 }
 
 const languageSelection = document.getElementById("language-selection");
