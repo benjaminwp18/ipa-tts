@@ -1,0 +1,91 @@
+/* Body styles */
+body {
+    margin: 0;
+    padding: 0;
+    justify-content: center; /* Center the content horizontally */
+    height: 100vh; /* Full viewport height */
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Main container to wrap content */
+.container {
+    max-width: 600px;
+    width: 100%; /* Ensure the container doesn't stretch too wide */
+    text-align: left; /* Ensure all content is left-aligned inside the container */
+}
+
+.ipa-lookup-container {
+    margin: 10px; /* Adjust as needed */
+}
+
+/* Flex container to keep the IPA input and sliders in the same row */
+.ipa-sliders {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center; /* Align content vertically centered */
+    gap: 20px; /* Space between elements */
+    width: 100%;
+    margin: 10px; /* Adjust as needed */
+}
+
+/* Stack label and input in a vertical column */
+.ipa-input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+}
+
+#make-sound-button {
+    align-self: center; /* Center it vertically */
+    margin-top: 0;
+    background-color: rgb(13, 110, 253);
+    color: white;
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor on hover */
+    padding: 10px; /* Keep padding for thickness */
+    width: 110px; /* Adjust this value to your desired width */
+}
+
+#language-selection, #text, #search-button, #make-sound-button, #ipa-text {
+    font-size: 16px;
+    border-radius: 5px; /* For rounded edges */
+    padding: 7px;
+}
+
+#search-button {
+    background-color: rgb(13, 110, 253);
+    color: white;
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor on hover */
+    padding: 10px; /* Keep padding for thickness */
+    width: 100px; /* Adjust this value to your desired width */
+}
+
+#search-button:hover {
+    background-color: rgb(10, 80, 200); /* Darker color on hover */
+}
+
+.ipa-lookup-container > div {
+    margin-bottom: 10px; /* Add vertical spacing between elements */
+}
+
+/* Adjust the last element to have no bottom margin */
+.ipa-lookup-container > div:last-child {
+    margin-bottom: 0; /* Remove margin from the last element */
+}
+
+.ipa-lookup-container label, .ipa-input label,  .ipa-sliders label {
+    font-size: 18px;
+}
+
+
+#language-selection {
+    background-color: #e0e0e0; /* Light gray background */
+}
+
+.ipa-sliders input[type="range"] {
+    width: 200px; /* Increase the width for a longer slider */
+    height: 8px; /* Decrease the height to make it skinnier */
+    border-radius: 5px; /* For rounded edges */
+    background-color: #e0e0e0; /* Light gray background for inputs */
+}

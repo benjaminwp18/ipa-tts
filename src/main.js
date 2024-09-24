@@ -1,4 +1,4 @@
-import { VOWELS } from "./sound.js";
+import { playWord } from "./sound.js";
 
 export function main() {
 
@@ -7,12 +7,11 @@ export function main() {
 
 	let ctx = new AudioContext();
 
-	for (const [ipa, vowel] of Object.entries(VOWELS)) {
-		let button = document.createElement("button");
-		button.innerText = ipa;
-		button.addEventListener("click", function() {
-			vowel.play(ctx, 1);
-		});
-    document.body.appendChild(button);
-	}
+	let soundButton = document.getElementById("make-sound-button");
+	let ipaTextField = document.getElementById("ipa-text");
+
+	soundButton.addEventListener("click", function (e) {
+		e.preventDefault();
+		playWord(ctx, ipaTextField.value);
+	});
 }
