@@ -14,13 +14,14 @@ class Formant {
 }
 
 const FUNDAMENTAL = 80;  // Hz
+const DURATION = 1;
 
 class Vowel {
     constructor(formants) {
         this.formants = formants;
     }
 
-    play(ctx, duration = 1) {
+    play(ctx, start = 0, duration = 1) {
         let osc = ctx.createOscillator();
         osc.type = "sawtooth";
         osc.frequency.value = FUNDAMENTAL;
@@ -37,12 +38,12 @@ class Vowel {
             filter.connect(ctx.destination);
         }
 
-        osc.start();
-        osc.stop(ctx.currentTime + duration);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration);
     }
 }
 
-export const VOWELS = {
+const VOWELS = {
     a: new Vowel([
         new Formant(600, 0, 60),
         new Formant(1040, -7, 70),
@@ -79,3 +80,15 @@ export const VOWELS = {
         new Formant(2950, -36, 120)
     ])
 };
+
+export function playWord(ctx, word) {
+    let t = 0;
+    for (let i = 0; i < word.length; i++) {
+        let phone = word[i];
+        let vowel = VOWELS[phone]
+        if (vowel !== undefined) {
+            vowel.play(ctx, t, DURATION);
+            t += DURATION;
+        }
+    }
+}
