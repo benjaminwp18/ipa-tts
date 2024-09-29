@@ -2,7 +2,9 @@ import { playWord } from "./sound.js";
 
 export function main() {
 
-	//Activate initial keyboard tab
+	document.getElementById("overlay").style.display = "none";
+
+	// Activate initial keyboard tab
 	document.getElementById("V").style.display = "block";
 
 	let ctx = new AudioContext();

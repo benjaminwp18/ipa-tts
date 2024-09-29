@@ -8,11 +8,18 @@
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
             import { main } from "./main.js";
-            document.getElementById('init-button').addEventListener('click', main);
+            document.getElementById('overlay').addEventListener('click', main);
         </script>
     </head>
 
     <body>
+        <div id="overlay">
+            <div id="overlay-text">
+                <h1>[Title]</h1>
+                <h3>Tap to start</h3>
+                <em>/ˈtæp ˈtu ˈstɑɹt/</em>
+            </div>
+        </div>
         <div class="container">
             <form id="ipa-lookup-form">
                 <div class="ipa-lookup-container">
