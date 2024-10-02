@@ -8,16 +8,21 @@
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
             import { main } from "./main.js";
-            document.getElementById('overlay').addEventListener('click', main);
+            const overlay = document.getElementById('overlay');
+            overlay.addEventListener('click', main);
+            overlay.addEventListener('animationend', () => {
+                overlay.style.display = 'none';
+            });
         </script>
     </head>
 
     <body>
         <div id="overlay">
             <div id="overlay-text">
-                <h1>[Title]</h1>
-                <h3>Tap to start</h3>
-                <em>/ˈtæp ˈtu ˈstɑɹt/</em>
+                <img src="../imgs/ipa-banner-1.png">
+                <h1>[ˈsinjɚ ˈpɹɑʤɛkt]</h1>
+                <h2><em>Tap to start</em></h2>
+                <img src="../imgs/ipa-banner-2.png">
             </div>
         </div>
         <div class="container">
