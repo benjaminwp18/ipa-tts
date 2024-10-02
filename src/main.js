@@ -1,9 +1,10 @@
 import { playWord } from "./sound.js";
 
 export function main() {
-
-	//Activate initial keyboard tab
-	document.getElementById("V").style.display = "block";
+	
+	// Activate initial keyboard tab
+	document.getElementById("V").classList.add("open");
+	document.getElementById("button-v").classList.add("active");
 
 	let ctx = new AudioContext();
 
