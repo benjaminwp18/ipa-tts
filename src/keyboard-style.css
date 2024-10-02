@@ -40,10 +40,25 @@
 }
 
 .key {
-    border-radius: 4px;
+    border-radius: 20px;
     border: none;
     height: 45px;
-    width: 45px;
+    width: 50px;
+}
+
+.key:hover {
+    background-color: #bcbdbf; /* Lighten the color for hover */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.bluekey {
+    background-color: rgb(165,210,238); /* Set background color to blue */
+    color: black; /* Change text color to white for better contrast */
+}
+
+.bluekey:hover {
+    background-color: #8BB3D5; /* Lighter blue on hover */
+    transition: background-color 0.3s; /* Smooth transition */
 }
 
 .diacritic {
