@@ -82,7 +82,10 @@
                             <th colspan="3">Central</th>
                             <th colspan="3">Back</th>
                             <th></th>
-                            <th colspan="2">Diacritics</th>
+                            <th colspan="2">
+                                Diacritics
+                                <button class="info-button" onclick="openPopup()">ℹ️</button>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -193,6 +196,15 @@
                         </tr>
                     </tbody>
                 </table>
+                <!-- The Pop-up Container -->
+                <div id="popup" class="popup">
+                    <div class="popup-content">
+                        <span class="close" onclick="closePopup()">&times;</span>
+                        <p>To type a character with a diacritic, simply press the button for the character, then press the button for the diacritic mark. For example, to type <span class="diacritic">ȧ</span>, press the <span class="diacritic">a</span> button, then press the <span class="diacritic">overdot</span> button.</p>
+                    </div>
+                </div>
+                <!-- Overlay for pop-up -->
+                <div class="popup-overlay"></div>
             </div>
 
 			<div id="C1" class="tabcontent">
@@ -466,8 +478,124 @@
             </div>
           
             <div id="misc" class="tabcontent">
-                Misc keyboard
+                <table class="key-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th colspan="2">Clicks</th>
+                            <th colspan="2">Suprasegmental</th>
+                            <th colspan="4">Tones and Word Accents</th>
+                            <th colspan="4">Diacritics for C</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td><button class="key">1</button></td>
+                            <td><button class="key">2</button></td>
+                            <td><button class="key">3</button></td>
+                            <td><button class="key">4</button></td>
+                            <th colspan = "2">Level</th>
+                            <th colspan = "2">Contour</th>
+                            <td><button class="key">9</button></td>
+                            <td><button class="key">10</button></td>
+                            <td><button class="key">11</button></td>
+                            <td><button class="key">12</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="key">13</button></td>
+                            <td><button class="key">14</button></td>
+                            <td><button class="key">15</button></td>
+                            <td><button class="key">16</button></td>
+                            <td><button class="key">17</button></td>
+                            <td><button class="key">18</button></td>
+                            <td><button class="key">19</button></td>
+                            <td><button class="key">20</button></td>
+                            <td><button class="key">21</button></td>
+                            <td><button class="key">22</button></td>
+                            <td><button class="key">23</button></td>
+                            <td><button class="key">24</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="key">25</button></td>
+                            <td></td>
+                            <td><button class="key">26</button></td>
+                            <td><button class="key">27</button></td>
+                            <td><button class="key">28</button></td>
+                            <td><button class="key">29</button></td>
+                            <td><button class="key">30</button></td>
+                            <td><button class="key">31</button></td>
+                            <td><button class="key">32</button></td>
+                            <td><button class="key">33</button></td>
+                            <td><button class="key">34</button></td>
+                            <td><button class="key">35</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">36</button></td>
+                            <td><button class="key">37</button></td>
+                            <td><button class="key">38</button></td>
+                            <td><button class="key">39</button></td>
+                            <td><button class="key">40</button></td>
+                            <td><button class="key">41</button></td>
+                            <td><button class="key">42</button></td>
+                            <td><button class="key">43</button></td>
+                            <td><button class="key">44</button></td>
+                            <td><button class="key">45</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">37</button></td>
+                            <td><button class="key">38</button></td>
+                            <td><button class="key">39</button></td>
+                            <td><button class="key">40</button></td>
+                            <td><button class="key">41</button></td>
+                            <td><button class="key">42</button></td>
+                            <td><button class="key">43</button></td>
+                            <td><button class="key">44</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">37</button></td>
+                            <td><button class="key">38</button></td>
+                            <td><button class="key">39</button></td>
+                            <td><button class="key">40</button></td>
+                            <td><button class="key">41</button></td>
+                            <td><button class="key">42</button></td>
+                            <td><button class="key">43</button></td>
+                            <td><button class="key">44</button></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">37</button></td>
+                            <td><button class="key">38</button></td>
+                            <td><button class="key">39</button></td>
+                            <td><button class="key">40</button></td>
+                            <td><button class="key">41</button></td>
+                            <td><button class="key">42</button></td>
+                            <td><button class="key">43</button></td>
+                            <td><button class="key">44</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+            
 
             <div id="keyboard-info" class="tabcontent">
                 To type a character with a diacritic, simply press the button for the character then press the button
