@@ -29,3 +29,13 @@ function openTab(evt, tabName) {
     document.getElementById(tabName).classList.add("open");
     evt.currentTarget.classList.add("active");
 }
+
+function openPopup() {
+    document.getElementById("popup").style.display = "block";
+    document.querySelector(".popup-overlay").style.display = "block";
+}
+
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.querySelector(".popup-overlay").style.display = "none";
+}
