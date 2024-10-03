@@ -43,7 +43,8 @@
     border-radius: 20px;
     border: none;
     height: 45px;
-    width: 50px;
+    width: 60px;
+    font-size: 20px; 
 }
 
 .key:hover {
