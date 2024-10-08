@@ -9,7 +9,7 @@ export function main() {
 	let ctx = new AudioContext();
 
 	let soundButton = document.getElementById("make-sound-button");
-	let ipaTextField = document.getElementById("ipa-text");
+	let ipaTextField = document.getElementById("ipa-text-input");
 
 	soundButton.addEventListener("click", function (e) {
 		e.preventDefault();
