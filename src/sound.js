@@ -84,7 +84,7 @@ const VOWELS = {
 
 export function playWord(ctx, word) {
     let analyzerNode = ctx.createAnalyser();
-    analyzerNode.fftSize = 256;
+    analyzerNode.fftSize = 1024;
     analyzerNode.smoothingTimeConstant = 0;
     analyzerNode.connect(ctx.destination);
 
@@ -110,6 +110,10 @@ export function playWord(ctx, word) {
     const pixelsPerMilli = canvas.width / spectrogramDuration;
     let spectrogramLastX = 0;
 
+    // Don't display frequencies above 10 kHz
+    const maxFrequency = 10000;
+    let displayedBinCount = Math.ceil(analyzerNode.frequencyBinCount / ctx.sampleRate * maxFrequency);
+
     let startTime = performance.now();
 
     function updateSpectrogram() {
@@ -121,10 +125,10 @@ export function playWord(ctx, word) {
 
         analyzerNode.getFloatFrequencyData(fftArray);
         
-        let binHeight = canvas.height / analyzerNode.frequencyBinCount;
+        let binHeight = canvas.height / displayedBinCount;
         let lastBinY = canvas.height;
-        for(let i = 0; i < analyzerNode.frequencyBinCount; i++) {
-            let intensity = Math.max(Math.min(255 + fftArray[i] * 2, 255), 0);
+        for(let i = 0; i < displayedBinCount; i++) {
+            let intensity = Math.max(Math.min(255 + fftArray[i] * 3, 255), 0);
             canvasCtx.fillStyle = `rgb(
                 ${255 - intensity}
                 255
