@@ -14,14 +14,14 @@ class Formant {
 }
 
 const FUNDAMENTAL = 80;  // Hz
-const DURATION = 1;
+const DURATION = 0.5;
 
 class Vowel {
     constructor(formants) {
         this.formants = formants;
     }
 
-    play(ctx, start = 0, duration = 1) {
+    play(ctx, destination, start = 0, duration = 1) {
         let osc = ctx.createOscillator();
         osc.type = "sawtooth";
         osc.frequency.value = FUNDAMENTAL;
@@ -35,7 +35,7 @@ class Vowel {
             filter.Q.value = formant.bw;
 
             osc.connect(filter);
-            filter.connect(ctx.destination);
+            filter.connect(destination);
         }
 
         osc.start(ctx.currentTime + start);
@@ -81,14 +81,65 @@ const VOWELS = {
     ])
 };
 
+
 export function playWord(ctx, word) {
+    let analyzerNode = ctx.createAnalyser();
+    analyzerNode.fftSize = 256;
+    analyzerNode.smoothingTimeConstant = 0;
+    analyzerNode.connect(ctx.destination);
+
+    let fftArray = new Float32Array(analyzerNode.frequencyBinCount);
+
     let t = 0;
     for (let i = 0; i < word.length; i++) {
         let phone = word[i];
         let vowel = VOWELS[phone]
         if (vowel !== undefined) {
-            vowel.play(ctx, t, DURATION);
+            vowel.play(ctx, analyzerNode, t, DURATION);
             t += DURATION;
         }
     }
+
+    const canvas = document.getElementById('spectrogram');
+    const canvasCtx = canvas.getContext("2d");
+
+    canvasCtx.fillStyle = "white";
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const spectrogramDuration = 5000;  // milliseconds
+    const pixelsPerMilli = canvas.width / spectrogramDuration;
+    let spectrogramLastX = 0;
+
+    let startTime = performance.now();
+
+    function updateSpectrogram() {
+        let spectrogramCurrentX = Math.floor((performance.now() - startTime) * pixelsPerMilli)
+        if (spectrogramCurrentX <= spectrogramLastX) {
+            requestAnimationFrame(updateSpectrogram);
+            return;
+        }
+
+        analyzerNode.getFloatFrequencyData(fftArray);
+        
+        let binHeight = canvas.height / analyzerNode.frequencyBinCount;
+        let lastBinY = canvas.height;
+        for(let i = 0; i < analyzerNode.frequencyBinCount; i++) {
+            let intensity = Math.max(Math.min(255 + fftArray[i] * 2, 255), 0);
+            canvasCtx.fillStyle = `rgb(
+                ${255 - intensity}
+                255
+                ${255 - intensity})`;
+            
+            let binY = Math.floor(canvas.height - binHeight * (i + 1));
+            canvasCtx.fillRect(spectrogramLastX, binY, spectrogramCurrentX - spectrogramLastX, lastBinY - binY);
+            lastBinY = binY;
+        }
+
+        spectrogramLastX = spectrogramCurrentX;
+        if (spectrogramCurrentX < canvas.width) {
+            requestAnimationFrame(updateSpectrogram);
+        }
+    }
+
+    updateSpectrogram();
 }
