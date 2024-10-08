@@ -8,11 +8,23 @@
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
             import { main } from "./main.js";
-            document.getElementById('init-button').addEventListener('click', main);
+            const overlay = document.getElementById('overlay');
+            overlay.addEventListener('click', main);
+            overlay.addEventListener('animationend', () => {
+                overlay.style.display = 'none';
+            });
         </script>
     </head>
 
     <body>
+        <div id="overlay">
+            <div id="overlay-text">
+                <img src="imgs/ipa-banner-1.png">
+                <h1>[ˈsinjɚ ˈpɹɑʤɛkt]</h1>
+                <h2><em>Tap to start</em></h2>
+                <img src="imgs/ipa-banner-2.png">
+            </div>
+        </div>
         <div class="container">
             <form id="ipa-lookup-form">
                 <div class="ipa-lookup-container">
@@ -28,6 +40,10 @@
                         <input placeholder="Enter text" id="text"/>
                         <button type="submit" id="search-button" style="background-color: rgb(13, 110, 253); color: white;">Search</button>
                     </div>
+                    <label>Result:</label>
+                    <div>
+                        <input placeholder="Output IPA" id="ipa-text-output"/>
+                    </div>
                     <div id="language-selection-warning" style="color: red"></div>
                 </div>
             </form>
@@ -37,7 +53,7 @@
                 <div class="ipa-sliders">
                     <div class="ipa-input">
                         <label for="ipa-to-sound">IPA to Sound</label>
-                        <input placeholder="Enter IPA" id="ipa-text"/>
+                        <input placeholder="Enter IPA" id="ipa-text-input">
                     </div>
                     <div>
                         <div>
@@ -58,9 +74,7 @@
                     </div>
                 </div>
             </form>
-            <button id="init-button">Initialize context! (grrr user action requirements)</button>
         </div>
-        <canvas id="spectrogram" width="600" height="400"></canvas>
         <input id="keyboard-linked">
         <div id="keyboard-area">
 

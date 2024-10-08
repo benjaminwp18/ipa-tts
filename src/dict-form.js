@@ -36,7 +36,7 @@ const SUPPORTED_LANGUAGES = {
 const languageSelection = document.getElementById("language-selection");
 const textInput = document.getElementById("text");
 const warningLabel = document.getElementById("language-selection-warning");
-const ipaToSoundInput = document.getElementById("ipa-text");
+const ipaToSoundInput = document.getElementById("ipa-text-output");
 
 const ipaLookupForm = document.getElementById("ipa-lookup-form");
 ipaLookupForm.addEventListener("submit", async (e) => {
