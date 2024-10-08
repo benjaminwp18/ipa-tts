@@ -8,11 +8,23 @@
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
             import { main } from "./main.js";
-            document.getElementById('init-button').addEventListener('click', main);
+            const overlay = document.getElementById('overlay');
+            overlay.addEventListener('click', main);
+            overlay.addEventListener('animationend', () => {
+                overlay.style.display = 'none';
+            });
         </script>
     </head>
 
     <body>
+        <div id="overlay">
+            <div id="overlay-text">
+                <img src="imgs/ipa-banner-1.png">
+                <h1>[ˈsinjɚ ˈpɹɑʤɛkt]</h1>
+                <h2><em>Tap to start</em></h2>
+                <img src="imgs/ipa-banner-2.png">
+            </div>
+        </div>
         <div class="container">
             <form id="ipa-lookup-form">
                 <div class="ipa-lookup-container">
@@ -62,7 +74,6 @@
                     </div>
                 </div>
             </form>
-            <button id="init-button">Initialize context! (grrr user action requirements)</button>
         </div>
         <div id="keyboard-area">
 
