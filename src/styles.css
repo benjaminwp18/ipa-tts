@@ -74,7 +74,7 @@ body {
     width: 110px; /* Adjust this value to your desired width */
 }
 
-#language-selection, #text, #search-button, #make-sound-button, #ipa-text {
+#language-selection, #text, #search-button, #make-sound-button, #ipa-text-output {
     font-size: 16px;
     border-radius: 5px; /* For rounded edges */
     padding: 7px;

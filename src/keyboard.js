@@ -1,4 +1,4 @@
-const linkedTextArea = document.getElementById("keyboard-linked"); // Text area linked to keyboard
+const linkedTextArea = document.getElementById("ipa-text-input"); // Text area linked to keyboard
 const allKeys = document.getElementsByClassName("key");
 const tabcontent = document.getElementsByClassName("tabcontent");
 const tablinks = document.getElementsByClassName("tablinks");
@@ -28,4 +28,14 @@ function openTab(evt, tabName) {
     // Open activated tab and add class active to the button clicked
     document.getElementById(tabName).classList.add("open");
     evt.currentTarget.classList.add("active");
+}
+
+function openPopup() {
+    document.getElementById("popup").style.display = "block";
+    document.querySelector(".popup-overlay").style.display = "block";
+}
+
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.querySelector(".popup-overlay").style.display = "none";
 }
