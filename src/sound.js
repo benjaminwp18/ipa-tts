@@ -107,17 +107,46 @@ export function playWord(ctx, word) {
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
     const spectrogramDuration = 5000;  // milliseconds
-    const pixelsPerMilli = canvas.width / spectrogramDuration;
-    let spectrogramLastX = 0;
+    const leftSidebarWidth = 50;
+    const bottomPadding = 10;
+    const chartHeight = canvas.height - bottomPadding;
+
+    const pixelsPerMilli = (canvas.width - leftSidebarWidth) / spectrogramDuration;
+    let spectrogramLastX = leftSidebarWidth;    
 
     // Don't display frequencies above 10 kHz
-    const maxFrequency = 10000;
-    let displayedBinCount = Math.ceil(analyzerNode.frequencyBinCount / ctx.sampleRate * maxFrequency);
+    const targetMaxFrequency = 10500;
+    let displayedBinCount = Math.ceil(analyzerNode.frequencyBinCount / ctx.sampleRate * targetMaxFrequency);
+
+    // Draw y labels
+    let maxDisplayedFrequency = displayedBinCount / analyzerNode.frequencyBinCount * ctx.sampleRate;
+    let axisSpacingHertz = 1000;
+    let axisSpacingPixels = chartHeight / maxDisplayedFrequency * axisSpacingHertz;
+
+    canvasCtx.lineWidth = 1.5;
+    canvasCtx.textAlign = 'right';
+    canvasCtx.textBaseline = 'middle';
+    canvasCtx.fillStyle ='black';
+    let labelFreq = 0;
+    for (let y = chartHeight; y > 0; y -= axisSpacingPixels) {
+        if (y != chartHeight) {
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(leftSidebarWidth - 10, y);
+            canvasCtx.lineTo(leftSidebarWidth, y);
+            canvasCtx.stroke();
+        }
+
+        canvasCtx.fillText(labelFreq, leftSidebarWidth - 12, y);
+        labelFreq += axisSpacingHertz;
+    }
+
+    canvasCtx.fillRect(leftSidebarWidth - 10, chartHeight, canvas.width - leftSidebarWidth + 10, 2);
+    canvasCtx.fillRect(leftSidebarWidth - 2, 0, 2, chartHeight);
 
     let startTime = performance.now();
 
     function updateSpectrogram() {
-        let spectrogramCurrentX = Math.floor((performance.now() - startTime) * pixelsPerMilli)
+        let spectrogramCurrentX = Math.floor((performance.now() - startTime) * pixelsPerMilli + leftSidebarWidth)
         if (spectrogramCurrentX <= spectrogramLastX) {
             requestAnimationFrame(updateSpectrogram);
             return;
@@ -125,8 +154,8 @@ export function playWord(ctx, word) {
 
         analyzerNode.getFloatFrequencyData(fftArray);
         
-        let binHeight = canvas.height / displayedBinCount;
-        let lastBinY = canvas.height;
+        let binHeight = chartHeight / displayedBinCount;
+        let lastBinY = chartHeight;
         for(let i = 0; i < displayedBinCount; i++) {
             let intensity = Math.max(Math.min(255 + fftArray[i] * 3, 255), 0);
             canvasCtx.fillStyle = `rgb(
@@ -134,7 +163,7 @@ export function playWord(ctx, word) {
                 255
                 ${255 - intensity})`;
             
-            let binY = Math.floor(canvas.height - binHeight * (i + 1));
+            let binY = Math.floor(chartHeight - binHeight * (i + 1));
             canvasCtx.fillRect(spectrogramLastX, binY, spectrogramCurrentX - spectrogramLastX, lastBinY - binY);
             lastBinY = binY;
         }
