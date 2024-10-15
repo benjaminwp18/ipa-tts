@@ -1,22 +1,9 @@
 async function test() {
-    s = klattMake(new KlattParam1980());
+    s = klattMake(new KlattParam());
 
     N = s.params["N_SAMP"];
     FF = s.params["FF"];
     BW = s.params["BW"];
-
-    /*
-
-    FF.T
-    [f1t1,f2t1,f3t1,...],
-    [f1t2,f2t2,f3t2,...],
-    ...
-
-    FF
-    [f1t1,f1t2,f1t3,...],
-    [f2t1,f2t2,f2t3]
-
-     */
 
     s.params["AV"].fill(60);
     s.params["F0"] = linearSequence(120, 70, N);
@@ -36,12 +23,13 @@ async function test() {
 // https://github.com/chdh/klatt-syn-app/blob/master/src/InternalAudioPlayer.ts
 const offlineAudioContext = new OfflineAudioContext(1, 1, 44100);
 
+/**
+ * Asynchronously play the provided samples as audio at the given sample rate.
+ * @param {Array} samples float array of samples
+ * @param {number} sampleRate integer sample rate, should be 10000 for Klatt
+ */
 async function playSamples(samples, sampleRate) {
-    const buffer = samplesToBuffer(samples, sampleRate);
-    await playBuffer(buffer);
-}
-
-function samplesToBuffer(samples, sampleRate) {
+    // Convert samples to audio context buffer
     const buffer = offlineAudioContext.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
     // buffer.copyToChannel(samples, 0);
@@ -49,10 +37,8 @@ function samplesToBuffer(samples, sampleRate) {
     for (let i = 0; i < samples.length; i++) {
         data[i] = samples[i];
     }
-    return buffer;
-}
 
-async function playBuffer (buffer) {
+    // Play the buffer
     const audioContext = new AudioContext();
     const sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = buffer;
@@ -60,6 +46,12 @@ async function playBuffer (buffer) {
     sourceNode.start();
 }
 
+/**
+ * [TODO: remove this if it's not needed]
+ * Make a transposed copy of the provided 2D array.
+ * @param {number[][]} matrix 2D array to be transposed
+ * @returns {number[][]} transposed copy of `matrix`
+ */
 function transpose(matrix) {
     const rows = matrix.length;
     const cols = matrix[0].length;
@@ -75,6 +67,13 @@ function transpose(matrix) {
     return transposedMatrix;
 }
 
+/**
+ * Generate a linear sequence of `n` equally spaced floats from `a` through `b` inclusive.
+ * @param {number} a float start bound of the sequence
+ * @param {number} b float end bound of the sequence
+ * @param {number} n integer number of items in the sequence
+ * @returns {number[]} an array of `n` equally spaced floats from `a` through `b` inclusive
+ */
 function linearSequence(a, b, n) {
     const step = (b - a) / (n - 1);
     const sequence = [];
@@ -86,16 +85,28 @@ function linearSequence(a, b, n) {
     return sequence;
 }
 
-// https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
-// Standard Normal variate using Box-Muller transform.
+/**
+ * Get random number from gaussian distribution using Box-Muller transform.
+ * https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+ * @param {number} mean float mean of the distribution (default 0)
+ * @param {number} stdev float standard deviation of the distribution (default 1)
+ * @returns {number} random float from a gaussian distribution described by `mean` and `stdev`
+ */
 function gaussianRandom(mean=0, stdev=1) {
-    const u = 1 - Math.random(); // Converting [0,1) to (0,1]
+    const u = 1 - Math.random();  // Converting [0,1) to (0,1]
     const v = Math.random();
-    const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     // Transform to the desired mean and standard deviation:
     return z * stdev + mean;
 }
 
+/**
+ * Get an array of random floats from gaussian distribution using Box-Muller transform.
+ * @param {number} size integer size of the array (default 1)
+ * @param {number} mean float mean of the distribution (default 0)
+ * @param {number} stdev float standard deviation of the distribution (default 1)
+ * @returns {number[]} array of random floats from a gaussian distribution described by `mean` and `stdev`
+ */
 function gaussianRandomArray(size=1, mean=0, stdev=1) {
     let array = [];
     for (let i = 0; i < size; i++) {
@@ -104,45 +115,26 @@ function gaussianRandomArray(size=1, mean=0, stdev=1) {
     return array;
 }
 
+// Legal parameter names
 const PARAM_NAMES = [
-    "FS",
-    "DUR",
-    "N_FORM",
-    "N_SAMP",
-    "VER",
-    "DT",
-    "F0",
-    "FF",
-    "BW",
-    "AV",
-    "AVS",
-    "AH",
-    "AF",
-    "FNZ",
-    "SW",
-    "FGP",
-    "BGP",
-    "FGZ",
-    "BGZ",
-    "FNP",
-    "BNP",
-    "BNZ",
-    "BGS",
-    "A1",
-    "A2",
-    "A3",
-    "A4",
-    "A5",
-    "A6",
-    "AN",
+    "FS", "DUR", "N_FORM", "N_SAMP", "DT", "F0", "FF", "BW", "AV", "AVS", "AH",
+    "AF", "FNZ", "SW", "FGP", "BGP", "FGZ", "BGZ", "FNP", "BNP", "BNZ", "BGS", "A1",
+    "A2", "A3", "A4", "A5", "A6", "AN"
 ];
 
-function klattMake(params = new KlattParam1980()) {
+// TODO: this klattMake/KlattParam workflow is really awkward.
+//       Rewrite it to just use the KlattSynth constructor?
+//       Store the KlattParam object in the synth?
+/**
+ * Create and setup a new KlattSynth.
+ * @param {KlattParam} params parameter object to import params from
+ * @returns {KlattSynth} a KlattSynth with params based on `params`
+ */
+function klattMake(params = new KlattParam()) {
     // Initialize synth
     const synth = new KlattSynth();
 
     // Loop through all time-varying parameters, processing as needed
-    // TODO: move this; it's just copying params from params into synth.params?
     PARAM_NAMES.forEach(paramName => {
         if (paramName === "FF" || paramName === "BW") {
             synth.params[paramName] = [];
@@ -162,8 +154,44 @@ function klattMake(params = new KlattParam1980()) {
 
 /***** KLATT SYNTH & PARAMS *****/
 
-class KlattParam1980 {
+class KlattParam {
     // TODO: Named params doesn't work in JS. Use a dict?
+    /**
+     * Create a new KlattParam.
+     * Bandwidths/frequencies are in Hz.
+     * Amplitudes are in dB.
+     * 
+     * @param {number} FS       sample rate (samples/s)     (default 10000)
+     * @param {number} N_FORM   number of formants          (default 5)
+     * @param {number} DUR      duration (s)                (default 1)
+     * @param {number} F0       fundemental (Hz)            (default 100)
+     *      Transformed into array of F0 over time.
+     * @param {number[]} FF     formants (Hz)               (default [500, 1500, 2500, 3500, 4500])
+     *      Transformed into 2D array where each row is a formant frequency over time.
+     * @param {number[]} BW     formant bandwidths          (default [50, 100, 100, 200, 250])
+     *      Transformed into 2D array where each row is a formant bandwidth over time.
+     * @param {number} AV       voicing ampl                (default 60)
+     * @param {number} AVS      quasi-sinusoid voicing ampl (default 0)
+     * @param {number} AH       aspiration ampl             (default 0)
+     * @param {number} AF       frication ampl              (default 0)
+     * @param {number} SW       cascade/parallel switch     (default 0) (0 or 1)
+     * @param {number} FGP      glottal resonator 1 freq    (default 0)
+     * @param {number} BGP      glottal resonator 1 BW      (default 100)
+     * @param {number} FGZ      glottal zero freq           (default 1500)
+     * @param {number} BGZ      glottal zero BW             (default 6000)         
+     * @param {number} FNP      nasal pole freq             (default 250)
+     * @param {number} BNP      nasal pole BW               (default 100)
+     * @param {number} FNZ      nasal zero freq             (default 250)
+     * @param {number} BNZ      nasal zero BW               (default 100)
+     * @param {number} BGS      glottal resonator 2 BW      (default 200)
+     * @param {number} A1       parallel formant 1 ampl     (default 0)
+     * @param {number} A2       parallel formant 2 ampl     (default 0)
+     * @param {number} A3       parallel formant 3 ampl     (default 0)
+     * @param {number} A4       parallel formant 4 ampl     (default 0)
+     * @param {number} A5       parallel formant 5 ampl     (default 0)
+     * @param {number} A6       parallel formant 6 ampl     (default 0)
+     * @param {number} AN       nasal formant ampl          (default 0)
+     */
     constructor(FS = 10000, N_FORM = 5, DUR = 1, F0 = 100,
         FF = [500, 1500, 2500, 3500, 4500],
         BW = [50, 100, 100, 200, 250],
@@ -176,7 +204,6 @@ class KlattParam1980 {
         this.DUR = DUR;
         this.N_FORM = N_FORM;
         this.N_SAMP = Math.round(FS * DUR);
-        this.VER = "KLSYN80";
         this.DT = 1 / FS;
         this.F0 = new Array(this.N_SAMP).fill(F0);
         this.FF = FF.map(f => new Array(this.N_SAMP).fill(f));
@@ -206,6 +233,9 @@ class KlattParam1980 {
 }
 
 class KlattSynth {
+    /**
+     * Create new KlattSynth.
+     */
     constructor() {
         // Create name
         this.name = "Klatt Formant Synthesizer";
@@ -228,7 +258,7 @@ class KlattSynth {
             "A1", "A2", "A3", "A4", "A5", "AN", // 1980 parallel
             "ANV",                              // Voicing parallel
             "SW", "INV_SAMP",                   // Synth settings
-            "N_SAMP", "FS", "DT", "VER"         // Synth settings
+            "N_SAMP", "FS", "DT"                // Synth settings
         ];
 
         // Initialize params with null values
@@ -238,41 +268,43 @@ class KlattSynth {
         }
     }
 
+    /**
+     * Create the network for this synth.
+     */
     setup() {
         // Initialize data vectors
         this.output = new Array(this.params["N_SAMP"]).fill(0);
 
-        // Differential functiontioning based on version...
-        if (this.params["VER"] === "KLSYN80") {
-            // Initialize sections
-            this.voice = new KlattVoice1980(this);
-            this.noise = new KlattNoise1980(this);
-            this.cascade = new KlattCascade1980(this);
-            this.parallel = new KlattParallel1980(this);
-            this.radiation = new KlattRadiation1980(this);
-            this.outputModule = new OutputModule(this);
+        // Initialize sections
+        this.voice = new KlattVoice(this);
+        this.noise = new KlattNoise(this);
+        this.cascade = new KlattCascade(this);
+        this.parallel = new KlattParallel(this);
+        this.radiation = new KlattRadiation(this);
+        this.outputModule = new OutputModule(this);
 
-            // Create section-level connections
-            this.voice.connect([this.cascade, this.parallel]);
-            this.noise.connect([this.cascade, this.parallel]);
-            this.cascade.connect([this.radiation]);
-            this.parallel.connect([this.radiation]);
-            this.radiation.connect([this.outputModule]);
+        // Create section-level connections
+        this.voice.connect([this.cascade, this.parallel]);
+        this.noise.connect([this.cascade, this.parallel]);
+        this.cascade.connect([this.radiation]);
+        this.parallel.connect([this.radiation]);
+        this.radiation.connect([this.outputModule]);
 
-            // Put all section objects into this.sections for reference
-            this.sections = [this.voice, this.noise, this.cascade,
-                             this.parallel, this.radiation, this.outputModule];
+        // Put all section objects into this.sections for reference
+        this.sections = [
+            this.voice, this.noise, this.cascade,
+            this.parallel, this.radiation, this.outputModule
+        ];
 
-            // Patch all components together within sections
-            for (const section of this.sections) {
-                section.patch();
-            }
-        }
-        else {
-            console.log("Sorry, versions other than Klatt 1980 are not supported.");
+        // Patch all components together within sections
+        for (const section of this.sections) {
+            section.patch();
         }
     }
 
+    /**
+     * Run the synth to generate its output.
+     */
     run() {
         this.output = new Array(this.params["N_SAMP"]).fill(0);
 
@@ -286,14 +318,16 @@ class KlattSynth {
         // Run each section
         for (const section of this.sections) {
             section.run();
-            
         }
 
         this.output = [...this.outputModule.output];
     }
 
+    /**
+     * Play the output of this synth.
+     */
     async play() {
-        console.log(this.output);
+        console.log("Final output: ", this.output);
 
         await playSamples(this.output, 10000);
     }
@@ -301,20 +335,31 @@ class KlattSynth {
 
 /***** BASE CLASSES *****/
 
+// TODO: don't pass the entire synth to all its children, we only need the params!
 class KlattComponent {
+    /**
+     * Create a new KlattComponent.
+     * @param {KlattSynth} mast the synth this component is in, used exclusively for params
+     * @param {KlattComponent[]} dests array of components that this component outputs to
+     */
     constructor(mast, dests = []) {
-        this.mast = mast;
-        this.dests = dests;
+        this.mast = mast;  // KlattSynth
+        this.dests = dests;  // KlattComponent[]
         this.input = new Array(this.mast.params["N_SAMP"]).fill(0);
         this.output = new Array(this.mast.params["N_SAMP"]).fill(0);
     }
 
+    /**
+     * Set the input of this component to `signal`.
+     * @param {number[]} signal float array output from the previous components
+     */
     receive(signal) {
-        for (let i = 0; i < signal.length; i++) {
-            this.input[i] = signal[i];
-        }
+        this.input = [...signal];
     }
 
+    /**
+     * Send this component's output to each of its dests.
+     */
     send() {
         console.log(`\t${this.constructor.name} sends`, [
             ...this.output.slice(0, 4),
@@ -326,12 +371,19 @@ class KlattComponent {
         }
     }
 
+    /**
+     * Connect this component's output to the provided components.
+     * @param {KlattComponent[]} components components to attach as this component's destinations
+     */
     connect(components) {
         for (const component of components) {
             this.dests.push(component);
         }
     }
 
+    /**
+     * Zero the input and output of this component.
+     */
     clean() {
         this.input.fill(0);
         this.output.fill(0);
@@ -339,32 +391,50 @@ class KlattComponent {
 }
 
 class KlattSection {
+    /**
+     * Create a new KlattSection.
+     * @param {KlattSynth} mast the synth this component is in, used exclusively for params
+     */
     constructor(mast) {
-        this.mast = mast;
-        this.components = [];
-        this.ins = [];
-        this.outs = [];
+        this.mast = mast;  // KlattSynth
+        this.components = [];  // KlattComponent[]
+        this.ins = [];  // Buffer[]
+        this.outs = [];  // Buffer[]
     }
 
+    /**
+     * Connect this section's output to the provided sections' inputs.
+     * @param {KlattSection[]} sections sections to output to through a pair of buffers 
+     */
     connect(sections) {
         for (const section of sections) {
-            section.ins.push(new Buffer(this.mast));
-            this.outs.push(new Buffer(this.mast, [section.ins[section.ins.length - 1]]));
+            const buffer = new Buffer(this.mast);
+            section.ins.push(buffer);
+            this.outs.push(new Buffer(this.mast, [buffer]));
         }
     }
 
+    /**
+     * Process the this section's input buffers.
+     */
     processIns() {
         for (const inEl of this.ins) {
             inEl.process();
         }
     }
 
+    /**
+     * Process this section's output buffers.
+     */
     processOuts() {
         for (const out of this.outs) {
             out.process();
         }
     }
 
+    /**
+     * Process this section's buffers and run its do() function.
+     */
     run() {
         if (this.ins !== null && this.ins.length > 0) {
             this.processIns();
@@ -374,11 +444,19 @@ class KlattSection {
             this.processOuts();
         }
     }
+    
+    /**
+     * Section dependent. Should run this section's components and
+     * set the inputs of this section's output buffers.
+     */
+    do() {
+        throw new Error("UNIMPLEMENTED: This KlattSection has no do() implementation!");
+    }
 }
 
 /***** SECTIONS *****/
 
-class KlattVoice1980 extends KlattSection {
+class KlattVoice extends KlattSection {
     constructor(mast) {
         super(mast);
         this.impulse = new Impulse(this.mast);
@@ -418,7 +496,7 @@ class KlattVoice1980 extends KlattSection {
     }
 }
   
-class KlattNoise1980 extends KlattSection {
+class KlattNoise extends KlattSection {
     constructor(mast) {
         super(mast);
         this.noisegen = new Noisegen(this.mast);
@@ -442,7 +520,7 @@ class KlattNoise1980 extends KlattSection {
     }
 }
 
-class KlattCascade1980 extends KlattSection {
+class KlattCascade extends KlattSection {
     constructor(mast) {
         super(mast);
         this.ah = new Amplifier(mast);
@@ -482,7 +560,7 @@ class KlattCascade1980 extends KlattSection {
     }
 }
 
-class KlattParallel1980 extends KlattSection {
+class KlattParallel extends KlattSection {
     constructor(mast) {
         super(mast);
 
@@ -560,7 +638,7 @@ class KlattParallel1980 extends KlattSection {
     }
 }
 
-class KlattRadiation1980 extends KlattSection {
+class KlattRadiation extends KlattSection {
     constructor(mast) {
         super(mast);
         this.mixer = new Mixer(mast);
