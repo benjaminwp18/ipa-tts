@@ -1,5 +1,32 @@
 async function test() {
     s = klattMake(new KlattParam1980());
+
+    N = s.params["N_SAMP"];
+    FF = s.params["FF"];
+    BW = s.params["BW"];
+
+    /*
+
+    FF.T
+    [f1t1,f2t1,f3t1,...],
+    [f1t2,f2t2,f3t2,...],
+    ...
+
+    FF
+    [f1t1,f1t2,f1t3,...],
+    [f2t1,f2t2,f2t3]
+
+     */
+
+    s.params["AV"].fill(60);
+    s.params["F0"] = linearSequence(120, 70, N);
+    FF[0].fill(310);
+    FF[1].fill(1060);
+    FF[2].fill(1380);
+    BW[0].fill(70);
+    BW[1].fill(100);
+    BW[2].fill(120);
+
     s.run();
     await s.play();
 }
@@ -31,6 +58,32 @@ async function playBuffer (buffer) {
     sourceNode.buffer = buffer;
     sourceNode.connect(audioContext.destination);
     sourceNode.start();
+}
+
+function transpose(matrix) {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const transposedMatrix = [];
+    for (let c = 0; c < cols; c++) {
+        transposedMatrix[c] = Array(rows);
+    }
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            transposedMatrix[c][r] = matrix[r][c];
+        }
+    }
+    return transposedMatrix;
+}
+
+function linearSequence(a, b, n) {
+    const step = (b - a) / (n - 1);
+    const sequence = [];
+    
+    for (let i = 0; i < n; i++) {
+        sequence.push(a + i * step);
+    }
+
+    return sequence;
 }
 
 // https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
@@ -263,7 +316,11 @@ class KlattComponent {
     }
 
     send() {
-        console.log(`\t${this.constructor.name} sends`, [...this.output]);
+        console.log(`\t${this.constructor.name} sends`, [
+            ...this.output.slice(0, 4),
+            '||',
+            ...this.output.slice(-4)
+        ]);
         for (const dest of this.dests) {
             dest.receive([...this.output]);
         }
@@ -596,8 +653,6 @@ class Resonator extends KlattComponent {
                 cPrime.push(-c[i] / a[i]);
             }
 
-            console.log("PRIMES: ", aPrime, bPrime, cPrime);
-
             return [aPrime, bPrime, cPrime];
         }
         else {
@@ -679,8 +734,17 @@ class Amplifier extends KlattComponent {
     }
 
     amplify(dB) {
-        dB = Math.sqrt(10) ^ (dB / 10)
-        this.output = this.input.map(inEl => inEl * dB);
+        if (dB instanceof Array) {
+            dB = dB.map(dBEl => Math.sqrt(10) ** (dBEl / 10));
+            this.output = [];
+            for (let i = 0; i < dB.length; i++) {
+                this.output.push(this.input[i] * dB[i]);
+            }
+        }
+        else {
+            dB = Math.sqrt(10) ** (dB / 10)
+            this.output = this.input.map(inEl => inEl * dB);
+        }
         this.send();
     }
 }
