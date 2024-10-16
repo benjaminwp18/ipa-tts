@@ -1,4 +1,4 @@
-async function test() {
+async function testKlatt() {
     s = klattMake(new KlattParam());
 
     N = s.params["N_SAMP"];
@@ -170,6 +170,8 @@ class KlattParam {
      *      Transformed into 2D array where each row is a formant frequency over time.
      * @param {number[]} BW     formant bandwidths          (default [50, 100, 100, 200, 250])
      *      Transformed into 2D array where each row is a formant bandwidth over time.
+     * 
+     * All the following params generate 1D arrays to allow variance over time:
      * @param {number} AV       voicing ampl                (default 60)
      * @param {number} AVS      quasi-sinusoid voicing ampl (default 0)
      * @param {number} AH       aspiration ampl             (default 0)
@@ -444,6 +446,13 @@ class KlattSection {
             this.processOuts();
         }
     }
+
+    /**
+     * Section dependent. Should connect this section's components.
+     */
+    patch() {
+        throw new Error("UNIMPLEMENTED: This KlattSection has no patch() implementation!");
+    }
     
     /**
      * Section dependent. Should run this section's components and
@@ -692,10 +701,18 @@ class OutputModule extends KlattSection {
 /***** COMPONENTS *****/
 
 class Buffer extends KlattComponent {
+    /**
+     * Create a new Buffer.
+     * @param {KlattSynth} mast the synth this component is in, used exclusively for params
+     * @param {KlattComponent[]} dests array of components that this component outputs to
+     */
     constructor(mast, dests = []) {
         super(mast, dests);
     }
 
+    /**
+     * Copy this Buffer's input to its output, then send the output to its destinations.
+     */
     process() {
         this.output = [...this.input];
         this.send();
@@ -703,20 +720,31 @@ class Buffer extends KlattComponent {
 }
 
 class Resonator extends KlattComponent {
+    /**
+     * Create a new Resonator.
+     * @param {KlattSynth} mast the synth this component is in, used exclusively for params
+     * @param {boolean} anti true if this resonator should be an antiresonator
+     */
     constructor(mast, anti = false) {
         super(mast);
         this.anti = anti;
     }
 
-    calcCoef(ff, bw) {
+    /**
+     * Get coefficient arrays that vary over time to apply to this Resonator's input.
+     * @param {number[]} ffs 1D array of a formant's freqencies over time
+     * @param {number[]} bws 1D array of a formant's bandwidth over time
+     * @returns {number[][]} array of three coefficient arrays to apply to this Resonator's input
+     */
+    calcCoef(ffs, bws) {
         const piDT = Math.PI * this.mast.params["DT"];
 
         let c = [];
         let b = [];
         let a = [];
-        for (let i = 0; i < bw.length; i++) {
-            c.push(-Math.exp(-2 * piDT * bw[i]));
-            b.push(2 * Math.exp(-piDT * bw[i]) * Math.cos(2 * piDT * ff[i]));
+        for (let i = 0; i < bws.length; i++) {
+            c.push(-Math.exp(-2 * piDT * bws[i]));
+            b.push(2 * Math.exp(-piDT * bws[i]) * Math.cos(2 * piDT * ffs[i]));
             a.push(1 - b[i] - c[i]);
         }
 
@@ -738,8 +766,13 @@ class Resonator extends KlattComponent {
         }
     }
 
-    resonate(ff, bw) {
-        const [a, b, c] = this.calcCoef(ff, bw);
+    /**
+     * Filter the input and send the result to this Resonator's destinations.
+     * @param {number[]} ffs 1D array of a formant's freqencies over time
+     * @param {number[]} bws 1D array of a formant's bandwidth over time
+     */
+    resonate(ffs, bws) {
+        const [a, b, c] = this.calcCoef(ffs, bws);
         this.output[0] = a[0] * this.input[0];
 
         // TODO: simplify cases
@@ -770,6 +803,10 @@ class Impulse extends KlattComponent {
         this.lastGlotPulse = 0;
     }
 
+    /**
+     * Generate glottal impulses with varying frequency F0, then send the result to destinations.
+     * @param {number[]} F0 array of frequencies of F0 over time
+     */
     impulseGen(F0) {
         let glotPeriod = [];
         for (const F0El of F0) {
@@ -793,6 +830,10 @@ class Mixer extends KlattComponent {
         super(mast);
     }
 
+    /**
+     * Add (i.e. elementwise sum) the signal to the input of this Mixer.
+     * @param {number[]} signal float array output from the previous components
+     */
     receive(signal) {
         this.input = [...this.input];
         for (let i = 0; i < this.input.length; i++) {
@@ -800,6 +841,9 @@ class Mixer extends KlattComponent {
         }
     }
 
+    /**
+     * Copy the input to the output and send the output to destinations.
+     */
     mix() {
         this.output = [...this.input];
         this.send();
@@ -811,6 +855,11 @@ class Amplifier extends KlattComponent {
         super(mast);
     }
 
+    /**
+     * Amplify the input by the provided `dB` scalar or time-varying array
+     * of dB, then send output to destinations.
+     * @param {number | number[]} dB amplification scalar or array
+     */
     amplify(dB) {
         if (dB instanceof Array) {
             dB = dB.map(dBEl => Math.sqrt(10) ** (dBEl / 10));
@@ -832,6 +881,10 @@ class Firstdiff extends KlattComponent {
         super(mast);
     }
 
+    /**
+     * Set the output to the difference between the input and the input shifted
+     * right by one element, then send output to destinations.
+     */
     differentiate() {
         this.output[0] = 0;
         for (let i = 1; i < this.mast.params["N_SAMP"]; i++) {
@@ -846,6 +899,10 @@ class Lowpass extends KlattComponent {
         super(mast);
     }
 
+    /**
+     * Set the output to the input after applying a lowpass filter,
+     * then send output to destinations.
+     */
     filter() {
         this.output[0] = this.input[0];
         for (let i = 1; i < this.mast.params["N_SAMP"]; i++) {
@@ -860,9 +917,20 @@ class Normalizer extends KlattComponent {
         super(mast);
     }
 
+    /**
+     * Normalize the input by dividing by the max magnitude element,
+     * set the output to the normalized result, then send the output
+     * to destinations.
+     */
     normalize() {
         const absMax = Math.max(...this.input.map(Math.abs));
-        this.output = this.input.map(inputEl => inputEl / absMax);
+        if (absMax === 0) {
+            console.warn("Max value was 0, skipping normalization");
+            this.output = [...this.input];
+        }
+        else {
+            this.output = this.input.map(inputEl => inputEl / absMax);
+        }
         this.send();
     }
 }
@@ -872,6 +940,9 @@ class Noisegen extends KlattComponent {
         super(mast);
     }
 
+    /**
+     * Set output to gaussian noise, then send output to destinations.
+     */
     generate() {
         this.output = gaussianRandomArray(this.mast.params["N_SAMP"]);
         this.send();
@@ -884,11 +955,23 @@ class Switch extends KlattComponent {
         this.clean();
     }
 
+    /**
+     * Send the first subarray of output to the first dest,
+     * and the second subarray of output to the second dest.
+     */
     send() {
         this.dests[0].receive([...this.output[0]]);
         this.dests[1].receive([...this.output[1]]);
     }
 
+    /**
+     * At time i:
+     *  If choice[i] is 0: set output[0][i] to input[i]
+     *  If choice[i] is 1: set output[1][i] to input[i]
+     * Otherwise all output elements are 0.
+     * Then send the first subarray in output to the first destination, and vice versa.
+     * @param {number[]} choice array of 0s and 1s, representing the branch to take at each time
+     */
     operate(choice) {
         for (let i = 0; i < this.mast.params["N_SAMP"]; i++) {
             if (choice[i] === 0) {
@@ -903,6 +986,9 @@ class Switch extends KlattComponent {
         this.send();
     }
 
+    /**
+     * Fill both output subarrays with 0.
+     */
     clean() {
         this.output = [];
         this.output.push(new Array(this.mast.params["N_SAMP"]).fill(0));
