@@ -7,12 +7,30 @@ async function testKlatt() {
 
     s.params["AV"].fill(60);
     s.params["F0"] = linearSequence(120, 70, N);
-    FF[0].fill(310);
-    FF[1].fill(1060);
-    FF[2].fill(1380);
-    BW[0].fill(70);
-    BW[1].fill(100);
-    BW[2].fill(120);
+
+    // rrrrrrrrrrrr
+    // FF[0].fill(310);
+    // FF[1].fill(1060);
+    // FF[2].fill(1380);
+    // BW[0].fill(70);
+    // BW[1].fill(100);
+    // BW[2].fill(120);
+
+    // iiiiiijjjjjj
+    // FF[0] = linearSequence(310, 290, N);
+    // FF[1] = linearSequence(2020, 2070, N);
+    // FF[2] = linearSequence(2960, 2960, N);
+    // BW[0] = linearSequence(45, 60, N);
+    // BW[1] = linearSequence(200, 200, N);
+    // BW[2] = linearSequence(400, 400, N);
+
+    // iiiijjjjrrrr
+    FF[0] = piecewiseLinearSequence([310, 300, 290, 310, 310], N);
+    FF[1] = piecewiseLinearSequence([2020, 2045, 2070, 1060, 1060], N);
+    FF[2] = piecewiseLinearSequence([2960, 2960, 2960, 1380, 1380], N);
+    BW[0] = piecewiseLinearSequence([45, 52, 60, 70, 70], N);
+    BW[1] = piecewiseLinearSequence([200, 200, 200, 100, 100], N);
+    BW[2] = piecewiseLinearSequence([400, 400, 400, 120, 120], N);
 
     s.run();
     await s.play();
@@ -48,6 +66,28 @@ async function playSamples(samples, sampleRate) {
 
 /**
  * [TODO: remove this if it's not needed]
+ * Get the outer product of column vectors a & b,
+ * where b is transposed to act as a row vector. i.e. ab^T
+ * @param {number[]} a array of numbers that will act as the column vector
+ * @param {number[]} b array of numbers that will act as the row vector
+ * @returns {number[][]} a 2D array with a.length rows & b.length cols,
+ *                       where output[r][c] = a[r] * b[c]
+ */
+function outerProduct(a, b) {
+    const outer = Array(a.length);
+
+    for (let r = 0; r < a.length; r++) {
+        outer[r] = (Array(b.length));
+        for (let c = 0; c < b.length; c++) {
+            outer[r][c] = a[r] * b[c];
+        }
+    }
+
+    return outer;
+}
+
+/**
+ * [TODO: remove this if it's not needed]
  * Make a transposed copy of the provided 2D array.
  * @param {number[][]} matrix 2D array to be transposed
  * @returns {number[][]} transposed copy of `matrix`
@@ -55,15 +95,15 @@ async function playSamples(samples, sampleRate) {
 function transpose(matrix) {
     const rows = matrix.length;
     const cols = matrix[0].length;
-    const transposedMatrix = [];
+
+    const transposedMatrix = Array(cols);
     for (let c = 0; c < cols; c++) {
         transposedMatrix[c] = Array(rows);
-    }
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
             transposedMatrix[c][r] = matrix[r][c];
         }
     }
+
     return transposedMatrix;
 }
 
@@ -75,11 +115,51 @@ function transpose(matrix) {
  * @returns {number[]} an array of `n` equally spaced floats from `a` through `b` inclusive
  */
 function linearSequence(a, b, n) {
+    if (!Number.isInteger(n) || n < 2) {
+        throw new Error("Linear sequence length must be an integer and at least 2");
+    }
+
     const step = (b - a) / (n - 1);
-    const sequence = [];
+    const sequence = Array(n);
     
     for (let i = 0; i < n; i++) {
-        sequence.push(a + i * step);
+        sequence[i] = a + i * step;
+    }
+
+    return sequence;
+}
+
+/**
+ * Create a piecewise sequence of linear subsequences with total length `n`. If `n` does not
+ * divide evenly by `targets - 1` (the number of subsequences), give 1 unit of the extra
+ * length to each subsequence starting from the left until it runs out.
+ * @param {number[]} targets the values of the sequence at the ends of piecewise components
+ * @param {number} n the integer number of values in the total sequence
+ * @returns {number[]} a piecewise sequence of linear subsequences
+ */
+function piecewiseLinearSequence(targets, n) {
+    const numSubsequences = targets.length - 1;
+
+    if (!Number.isInteger(n) || n < 2 * numSubsequences) {
+        throw new Error("Linear sequence length must be an integer and at least 2 times the number of subsequences");
+    }
+
+    let remainder = n % numSubsequences;
+    const subsequenceLength = Math.floor(n / numSubsequences);
+
+    const sequence = [];
+
+    let bonusLength = 0;
+    for (let i = 0; i < targets.length - 1; i++) {
+        if (remainder > 0) {
+            remainder--;
+            bonusLength = 1;
+        }
+
+        const subsequence = linearSequence(targets[i], targets[i + 1], subsequenceLength + bonusLength);
+        sequence.push(...subsequence);
+
+        bonusLength = 0;
     }
 
     return sequence;
@@ -194,7 +274,7 @@ class KlattParam {
      * @param {number} A6       parallel formant 6 ampl     (default 0)
      * @param {number} AN       nasal formant ampl          (default 0)
      */
-    constructor(FS = 10000, N_FORM = 5, DUR = 1, F0 = 100,
+    constructor(FS = 10000, N_FORM = 5, DUR = 0.5, F0 = 100,
         FF = [500, 1500, 2500, 3500, 4500],
         BW = [50, 100, 100, 200, 250],
         AV = 60, AVS = 0, AH = 0, AF = 0,
