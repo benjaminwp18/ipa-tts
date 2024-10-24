@@ -36,6 +36,94 @@ async function testKlatt() {
     await s.play();
 }
 
+async function testKlatt2() {
+    const i = new Monophthong([310, 2020, 2960], [45, 200, 400]);
+    const r = new Monophthong([310, 1060, 1380], [70, 100, 120]);
+    const ɪ = new Monophthong([400, 1900, 2570], [50, 100, 140]);
+    const ε = new Monophthong([620, 1660, 2430], [70, 130, 300]);
+    const æ = new Monophthong([700, 1560, 2430], [70, 130, 320]);
+    // const ə = new Monophthong([500, 1270, 2570], [90, 60, 140]);
+    const ɑ = new Monophthong([620, 850, 2570], [70, 50, 140]);
+    const ʊ = new Monophthong([400, 890, 2100], [50, 100, 80]);
+
+    const params = i.makeParams()
+        .append(ɪ.makeParams())
+        .append(ε.makeParams())
+        .append(æ.makeParams())
+        .append(ɑ.makeParams())
+        .append(ʊ.makeParams());
+
+    const mat = [
+        ["AV", params.AV],
+        ["AVS", params.AVS],
+        ["AH", params.AH],
+        ["AF", params.AF],
+        ["FNZ", params.FNZ],
+        ["SW", params.SW],
+        ["FGP", params.FGP],
+        ["BGP", params.BGP],
+        ["FGZ", params.FGZ],
+        ["BGZ", params.BGZ],
+        ["FNP", params.FNP],
+        ["BNP", params.BNP],
+        ["BNZ", params.BNZ],
+        ["BGS", params.BGS],
+        ["A1", params.A1],
+        ["A2", params.A2],
+        ["A3", params.A3],
+        ["A4", params.A4],
+        ["A5", params.A5],
+        ["A6", params.A6],
+        ["A", params.AN]
+    ];
+
+    const synth = klattMake(params);
+    synth.run();
+    await synth.play();
+}
+
+class Phone {
+    makeParams() { }
+}
+
+class Monophthong {
+    constructor(formantFreqs, bandwidths) {
+        if (formantFreqs.length !== bandwidths.length) {
+            throw new Error("Number of frequencies and number of bandwidths must be the same" +
+                `(${formantFreqs.length} !== ${bandwidths.length})`)
+        }
+
+        this.formantFreqs = formantFreqs;
+        this.bandwidths = bandwidths;
+        this.params = null;
+    }
+
+    makeParams() {
+        if (this.params !== null) {
+            return this.params;
+        }
+
+        this.params = new KlattParam();
+        const N = this.params.N_SAMP;
+        let FF = this.params.FF;
+        let BW = this.params.BW;
+
+        if (FF.length < this.formantFreqs.length) {
+            throw new Error(`Cannot have more than ${FF.length} formants`);
+        }
+
+        this.params.AV.fill(60);
+        this.params.F0 = linearSequence(120, 70, N);
+
+        for (let i = 0; i < this.formantFreqs.length; i++) {
+            FF[i].fill(this.formantFreqs[i]);
+            BW[i].fill(this.bandwidths[i]);
+        }
+
+        return this.params;
+    }
+}
+
 /***** HELPERS *****/
 
 // https://github.com/chdh/klatt-syn-app/blob/master/src/InternalAudioPlayer.ts
@@ -312,6 +400,47 @@ class KlattParam {
         this.A6 = new Array(this.N_SAMP).fill(A6);
         this.AN = new Array(this.N_SAMP).fill(AN);
     }
+
+    append(klattParam) {
+        if (klattParam.FS !== this.FS || klattParam.N_FORM !== this.N_FORM) {
+            throw new Error("Sample rate FS and number of formants N_FORM must be the same to append KlattParam objects");
+        }
+
+        this.DUR += klattParam.DUR;
+        this.N_SAMP = Math.round(this.FS * this.DUR);
+        this.DT = 1 / this.FS;
+
+        for (let i = 0; i < this.N_FORM; i++) {
+            this.FF[i] = this.FF[i].concat(klattParam.FF[i]);
+            this.BW[i] = this.BW[i].concat(klattParam.BW[i]);
+        }
+
+        this.F0 = this.F0.concat(klattParam.F0);
+        this.AV = this.AV.concat(klattParam.AV);
+        this.AVS = this.AVS.concat(klattParam.AVS);
+        this.AH = this.AH.concat(klattParam.AH);
+        this.AF = this.AF.concat(klattParam.AF);
+        this.FNZ = this.FNZ.concat(klattParam.FNZ);
+        this.SW = this.SW.concat(klattParam.SW);
+        this.FGP = this.FGP.concat(klattParam.FGP);
+        this.BGP = this.BGP.concat(klattParam.BGP);
+        this.FGZ = this.FGZ.concat(klattParam.FGZ);
+        this.BGZ = this.BGZ.concat(klattParam.BGZ);
+        this.FNP = this.FNP.concat(klattParam.FNP);
+        this.BNP = this.BNP.concat(klattParam.BNP);
+        this.BNZ = this.BNZ.concat(klattParam.BNZ);
+        this.BGS = this.BGS.concat(klattParam.BGS);
+        this.A1 = this.A1.concat(klattParam.A1);
+        this.A2 = this.A2.concat(klattParam.A2);
+        this.A3 = this.A3.concat(klattParam.A3);
+        this.A4 = this.A4.concat(klattParam.A4);
+        this.A5 = this.A5.concat(klattParam.A5);
+        this.A6 = this.A6.concat(klattParam.A6);
+        this.AN = this.AN.concat(klattParam.AN);
+
+        // Enable daisy chaining
+        return this;
+    }
 }
 
 class KlattSynth {
@@ -445,9 +574,10 @@ class KlattComponent {
     send() {
         console.log(`\t${this.constructor.name} sends`, [
             ...this.output.slice(0, 4),
-            '||',
+            "||",
             ...this.output.slice(-4)
         ]);
+
         for (const dest of this.dests) {
             dest.receive([...this.output]);
         }
@@ -581,10 +711,10 @@ class KlattVoice extends KlattSection {
         this.mixer.mix();
         this.switch.operate(this.mast.params["SW"]);
 
-        console.log("KlattVoice outputs", [...this.switch.output])
+        console.log("KlattVoice outputs", [...this.switch.output]);
     }
 }
-  
+
 class KlattNoise extends KlattSection {
     constructor(mast) {
         super(mast);
@@ -880,7 +1010,6 @@ class Resonator extends KlattComponent {
 class Impulse extends KlattComponent {
     constructor(mast) {
         super(mast);
-        this.lastGlotPulse = 0;
     }
 
     /**
@@ -893,11 +1022,11 @@ class Impulse extends KlattComponent {
             glotPeriod.push(Math.round(this.mast.params["FS"] / F0El));
         }
 
-        this.lastGlotPulse = 0;
+        let lastGlotPulse = 0;
         for (let i = 0; i < this.mast.params["N_SAMP"]; i++) {
-            if (i - this.lastGlotPulse >= glotPeriod[i]) {
+            if (i - lastGlotPulse >= glotPeriod[i]) {
                 this.output[i] = 1;
-                this.lastGlotPulse = i;
+                lastGlotPulse = i;
             }
         }
 
