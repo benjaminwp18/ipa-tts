@@ -1178,7 +1178,7 @@ class Switch extends KlattComponent {
 
 const PHONES = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
-    "r": new Monophthong([310, 1060, 1380], [70, 100, 120]),
+    "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
     "ε": new Monophthong([620, 1660, 2430], [70, 130, 300]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
