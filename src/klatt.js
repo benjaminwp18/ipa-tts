@@ -53,30 +53,6 @@ async function testKlatt2() {
         .append(ɑ.makeParams())
         .append(ʊ.makeParams());
 
-    const mat = [
-        ["AV", params.AV],
-        ["AVS", params.AVS],
-        ["AH", params.AH],
-        ["AF", params.AF],
-        ["FNZ", params.FNZ],
-        ["SW", params.SW],
-        ["FGP", params.FGP],
-        ["BGP", params.BGP],
-        ["FGZ", params.FGZ],
-        ["BGZ", params.BGZ],
-        ["FNP", params.FNP],
-        ["BNP", params.BNP],
-        ["BNZ", params.BNZ],
-        ["BGS", params.BGS],
-        ["A1", params.A1],
-        ["A2", params.A2],
-        ["A3", params.A3],
-        ["A4", params.A4],
-        ["A5", params.A5],
-        ["A6", params.A6],
-        ["A", params.AN]
-    ];
-
     const synth = klattMake(params);
     synth.run();
     await synth.play();
@@ -95,32 +71,27 @@ class Monophthong {
 
         this.formantFreqs = formantFreqs;
         this.bandwidths = bandwidths;
-        this.params = null;
     }
 
     makeParams() {
-        if (this.params !== null) {
-            return this.params;
-        }
-
-        this.params = new KlattParam();
-        const N = this.params.N_SAMP;
-        let FF = this.params.FF;
-        let BW = this.params.BW;
+        let params = new KlattParam();
+        const N = params.N_SAMP;
+        let FF = params.FF;
+        let BW = params.BW;
 
         if (FF.length < this.formantFreqs.length) {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        this.params.AV.fill(60);
-        this.params.F0 = linearSequence(120, 70, N);
+        params.AV.fill(60);
+        params.F0 = linearSequence(120, 70, N);
 
         for (let i = 0; i < this.formantFreqs.length; i++) {
             FF[i].fill(this.formantFreqs[i]);
             BW[i].fill(this.bandwidths[i]);
         }
 
-        return this.params;
+        return params;
     }
 }
 
@@ -1203,4 +1174,35 @@ class Switch extends KlattComponent {
         this.output.push(new Array(this.mast.params["N_SAMP"]).fill(0));
         this.output.push(new Array(this.mast.params["N_SAMP"]).fill(0));
     }
+}
+
+const PHONES = {
+    "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
+    "r": new Monophthong([310, 1060, 1380], [70, 100, 120]),
+    "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
+    "ε": new Monophthong([620, 1660, 2430], [70, 130, 300]),
+    "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
+    "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
+    "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
+};
+
+async function playWordWithKlatt(word) {
+    let params = null;
+
+    for (let i = 0; i < word.length; i++) {
+        let grapheme = word[i];
+        let phone = PHONES[grapheme]
+        if (phone !== undefined) {
+            if (params === null) {
+                params = phone.makeParams();
+            }
+            else {
+                params = params.append(phone.makeParams());
+            }
+        }
+    }
+
+    const synth = klattMake(params);
+    synth.run();
+    await synth.play();
 }

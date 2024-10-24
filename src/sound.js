@@ -82,13 +82,5 @@ const VOWELS = {
 };
 
 export function playWord(ctx, word) {
-    let t = 0;
-    for (let i = 0; i < word.length; i++) {
-        let phone = word[i];
-        let vowel = VOWELS[phone]
-        if (vowel !== undefined) {
-            vowel.play(ctx, t, DURATION);
-            t += DURATION;
-        }
-    }
+    playWordWithKlatt(word);
 }
