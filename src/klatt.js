@@ -124,10 +124,9 @@ async function playSamples(samples, sampleRate) {
     }
 
     // Play the buffer
-    const audioContext = new AudioContext();
-    const sourceNode = audioContext.createBufferSource();
+    const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
-    sourceNode.connect(audioContext.destination);
+    sourceNode.connect(ctx.destination);
     sourceNode.start();
 }
 
