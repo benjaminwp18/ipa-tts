@@ -1,4 +1,3 @@
-import { playWord } from "./sound.js";
 import * as Klatt from "./klatt.js";
 
 export function main() {
@@ -20,6 +19,6 @@ export function main() {
 
 	soundButton.addEventListener("click", function (e) {
 		e.preventDefault();
-		playWord(ctx, ipaTextField.value);
+		Klatt.playWord(ipaTextField.value);
 	});
 }
