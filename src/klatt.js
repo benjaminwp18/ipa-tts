@@ -9,66 +9,6 @@ export function init(context) {
     ctx = context;
 }
 
-async function test() {
-    s = klattMake(new KlattParam());
-
-    N = s.params["N_SAMP"];
-    FF = s.params["FF"];
-    BW = s.params["BW"];
-
-    s.params["AV"].fill(60);
-    s.params["F0"] = linearSequence(120, 70, N);
-
-    // rrrrrrrrrrrr
-    // FF[0].fill(310);
-    // FF[1].fill(1060);
-    // FF[2].fill(1380);
-    // BW[0].fill(70);
-    // BW[1].fill(100);
-    // BW[2].fill(120);
-
-    // iiiiiijjjjjj
-    // FF[0] = linearSequence(310, 290, N);
-    // FF[1] = linearSequence(2020, 2070, N);
-    // FF[2] = linearSequence(2960, 2960, N);
-    // BW[0] = linearSequence(45, 60, N);
-    // BW[1] = linearSequence(200, 200, N);
-    // BW[2] = linearSequence(400, 400, N);
-
-    // iiiijjjjrrrr
-    FF[0] = piecewiseLinearSequence([310, 300, 290, 310, 310], N);
-    FF[1] = piecewiseLinearSequence([2020, 2045, 2070, 1060, 1060], N);
-    FF[2] = piecewiseLinearSequence([2960, 2960, 2960, 1380, 1380], N);
-    BW[0] = piecewiseLinearSequence([45, 52, 60, 70, 70], N);
-    BW[1] = piecewiseLinearSequence([200, 200, 200, 100, 100], N);
-    BW[2] = piecewiseLinearSequence([400, 400, 400, 120, 120], N);
-
-    s.run();
-    await s.play();
-}
-
-async function test2() {
-    const i = new Monophthong([310, 2020, 2960], [45, 200, 400]);
-    const r = new Monophthong([310, 1060, 1380], [70, 100, 120]);
-    const ɪ = new Monophthong([400, 1900, 2570], [50, 100, 140]);
-    const ε = new Monophthong([620, 1660, 2430], [70, 130, 300]);
-    const æ = new Monophthong([700, 1560, 2430], [70, 130, 320]);
-    // const ə = new Monophthong([500, 1270, 2570], [90, 60, 140]);
-    const ɑ = new Monophthong([620, 850, 2570], [70, 50, 140]);
-    const ʊ = new Monophthong([400, 890, 2100], [50, 100, 80]);
-
-    const params = i.makeParams()
-        .append(ɪ.makeParams())
-        .append(ε.makeParams())
-        .append(æ.makeParams())
-        .append(ɑ.makeParams())
-        .append(ʊ.makeParams());
-
-    const synth = klattMake(params);
-    synth.run();
-    await synth.play();
-}
-
 class Phone {
     makeParams() { }
 }
