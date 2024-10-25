@@ -1,3 +1,5 @@
+import * as Klatt from "./klatt.js";
+
 class Formant {
     /**
      * Formant bandpass filter configuration
@@ -82,5 +84,5 @@ const VOWELS = {
 };
 
 export function playWord(ctx, word) {
-    playWordWithKlatt(word);
+    Klatt.playWord(word);
 }

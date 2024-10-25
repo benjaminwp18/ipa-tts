@@ -1,4 +1,5 @@
 import { playWord } from "./sound.js";
+import * as Klatt from "./klatt.js";
 
 export function main() {
 	
@@ -12,6 +13,7 @@ export function main() {
 	document.getElementById("button-v").classList.add("active");
 
 	let ctx = new AudioContext();
+	Klatt.init(ctx);
 
 	let soundButton = document.getElementById("make-sound-button");
 	let ipaTextField = document.getElementById("ipa-text-input");

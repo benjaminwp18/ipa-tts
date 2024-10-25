@@ -1,4 +1,15 @@
-async function testKlatt() {
+let ctx = null;
+
+/**
+ * Must be called before trying to use any other functions in this module.
+ * saves the given audio context to use for all audio operations.
+ * @param {AudioContext} context
+ */
+export function init(context) {
+    ctx = context;
+}
+
+async function test() {
     s = klattMake(new KlattParam());
 
     N = s.params["N_SAMP"];
@@ -36,7 +47,7 @@ async function testKlatt() {
     await s.play();
 }
 
-async function testKlatt2() {
+async function test2() {
     const i = new Monophthong([310, 2020, 2960], [45, 200, 400]);
     const r = new Monophthong([310, 1060, 1380], [70, 100, 120]);
     const ɪ = new Monophthong([400, 1900, 2570], [50, 100, 140]);
@@ -97,9 +108,6 @@ class Monophthong {
 
 /***** HELPERS *****/
 
-// https://github.com/chdh/klatt-syn-app/blob/master/src/InternalAudioPlayer.ts
-const offlineAudioContext = new OfflineAudioContext(1, 1, 44100);
-
 /**
  * Asynchronously play the provided samples as audio at the given sample rate.
  * @param {Array} samples float array of samples
@@ -107,7 +115,7 @@ const offlineAudioContext = new OfflineAudioContext(1, 1, 44100);
  */
 async function playSamples(samples, sampleRate) {
     // Convert samples to audio context buffer
-    const buffer = offlineAudioContext.createBuffer(1, samples.length, sampleRate);
+    const buffer = ctx.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
     // buffer.copyToChannel(samples, 0);
     const data = buffer.getChannelData(0);
@@ -1186,7 +1194,7 @@ const PHONES = {
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
 };
 
-async function playWordWithKlatt(word) {
+export async function playWord(word) {
     let params = null;
 
     for (let i = 0; i < word.length; i++) {
