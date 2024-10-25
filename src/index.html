@@ -8,17 +8,18 @@
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
             import { main } from "./main.js";
+            import * as Klatt from "./klatt.js";
             const overlay = document.getElementById('overlay');
             overlay.addEventListener('click', main);
             overlay.addEventListener('animationend', () => {
                 overlay.style.display = 'none';
             });
+	    document.querySelector("#klatt-test-btn").addEventListener("click", () => Klatt.test2());
         </script>
     </head>
 
     <body>
-        <script src="klatt.js"></script>
-        <!-- <button onclick="testKlatt2();">Test Klatt synthesis!</button> -->
+        <!-- <button id="klatt-test-btn">Test Klatt synthesis!</button> -->
         <div id="overlay">
             <div id="overlay-text">
                 <img src="imgs/ipa-banner-1.png">
