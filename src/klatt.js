@@ -1123,11 +1123,16 @@ class Switch extends KlattComponent {
     }
 }
 
+// Some chars have multiple identical-looking unicode values
+const REPLACEMENTS = {
+    "ε": "ɛ"  // Greek epsilon -> Latin epsilon
+}
+
 const PHONES = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
     "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
-    "ε": new Monophthong([620, 1660, 2430], [70, 130, 300]),
+    "ɛ": new Monophthong([620, 1660, 2430], [70, 130, 300]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
     "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
@@ -1138,6 +1143,19 @@ export async function playWord(word) {
 
     for (let i = 0; i < word.length; i++) {
         let grapheme = word[i];
+
+        console.log(`"${grapheme}"`);
+
+        grapheme = REPLACEMENTS[grapheme] || grapheme;
+
+        // Converts ə˞  to ɚ ("rrrrr")
+        // TODO: do a single sweep through the whole string to create
+        //       grapheme objects with properties describing their diacritics
+        if (grapheme === "ə" && i < word.length - 1 && word[i+1] === "˞") {
+            grapheme = "ɚ";
+            i++;
+        }
+
         let phone = PHONES[grapheme]
         if (phone !== undefined) {
             if (params === null) {
@@ -1149,7 +1167,9 @@ export async function playWord(word) {
         }
     }
 
-    const synth = klattMake(params);
-    synth.run();
-    await synth.play();
+    if (params !== null) {
+        const synth = klattMake(params);
+        synth.run();
+        await synth.play();
+    }
 }
