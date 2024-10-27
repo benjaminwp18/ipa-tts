@@ -1144,8 +1144,6 @@ export async function playWord(word) {
     for (let i = 0; i < word.length; i++) {
         let grapheme = word[i];
 
-        console.log(`"${grapheme}"`);
-
         grapheme = REPLACEMENTS[grapheme] || grapheme;
 
         // Converts ə˞  to ɚ ("rrrrr")
