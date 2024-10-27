@@ -9,8 +9,98 @@ export function init(context) {
     ctx = context;
 }
 
-class Phone {
-    makeParams() { }
+class Fricative {
+    constructor() {
+        this.AF = 0;
+        this.AH = 0;
+        this.AV = 60;
+        this.A1 = 0;
+        this.A2 = 0;
+        this.A3 = 0;
+        this.A4 = 0;
+        this.A5 = 0;
+        this.A6 = 0;
+    }
+
+    setAF(AF) {
+        this.AF = AF;
+        return this;
+    }
+
+    setAH(AH) {
+        this.AH = AH;
+        return this;
+    }
+
+    setAV(AV) {
+        this.AV = AV;
+        return this;
+    }
+
+    setAmps(resonatorNumbers, amplitudes) {
+        if (resonatorNumbers.length !== amplitudes.length) {
+            throw new Error("Must specify equal number of resonator numbers & amplitudes");
+        }
+        else {
+            for (let i = 0; i < resonatorNumbers.length; i++) {
+                this.setAmp(resonatorNumbers[i], amplitudes[i]);
+            }
+        }
+
+        return this;
+    }
+
+    setAmp(resonatorNumber, amplitude) {
+        switch (resonatorNumber) {
+            case 1:
+                this.A1 = amplitude;
+                break;
+            case 2:
+                this.A2 = amplitude;
+                break;
+            case 3:
+                this.A3 = amplitude;
+                break;
+            case 4:
+                this.A4 = amplitude;
+                break;
+            case 5:
+                this.A5 = amplitude;
+                break;
+            case 6:
+                this.A6 = amplitude;
+                break;
+            default:
+                throw new Error("Fricative resonator numbers must be integers 1-6");
+        }
+
+        return this;
+    }
+
+    makeParams() {
+        let params = new KlattParam();
+        const N = params.N_SAMP;
+
+        params.F0 = linearSequence(120, 70, N);
+        params.SW.fill(0);  // TODO: document what value is what side of the switch
+
+        params.A1.fill(this.A1);
+        params.A2.fill(this.A2);
+        params.A3.fill(this.A3);
+        params.A4.fill(this.A4);
+        params.A5.fill(this.A5);
+        params.A6.fill(this.A6);
+
+        // params.AB = this.AB;
+        params.AV.fill(this.AV);
+        params.AF.fill(this.AF);  // TODO: AF seems to dominate noise from AV (for voiced C)
+        params.AH.fill(this.AH);
+
+        // TODO: fricatives are much louder than Vs so normalization is smushing V amplitude
+        // Similarly, sh >>> s, so s gets smushed when paired with sh
+
+        return params;
+    }
 }
 
 class Monophthong {
@@ -1136,6 +1226,10 @@ const PHONES = {
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
     "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
+    "s": new Fricative().setAF(60).setAmp(6, 52),
+    "z": new Fricative().setAV(60).setAF(60).setAmp(6, 52),
+    "ʃ": new Fricative().setAF(55).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
+    "ʒ": new Fricative().setAF(53).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53])
 };
 
 export async function playWord(word) {
