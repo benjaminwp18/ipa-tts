@@ -10,7 +10,8 @@ export function init(context) {
 }
 
 class Fricative {
-    constructor() {
+    constructor(duration_ms = 150) {
+        this.duration_ms = duration_ms;
         this.AF = 0;
         this.AH = 0;
         this.AV = 60;
@@ -79,6 +80,9 @@ class Fricative {
 
     makeParams() {
         let params = new KlattParam();
+
+        params.setMetadata(true, this.duration_ms / 1000);
+
         const N = params.N_SAMP;
 
         params.F0 = linearSequence(120, 70, N);
@@ -217,12 +221,16 @@ function linearSequence(a, b, n) {
 
     const step = (b - a) / (n - 1);
     const sequence = Array(n);
-    
+
     for (let i = 0; i < n; i++) {
         sequence[i] = a + i * step;
     }
 
     return sequence;
+}
+
+function linearRamp(arrayA, arrayB, n) {
+    return linearSequence(arrayA[arrayA.length - 1], arrayB[0], n);
 }
 
 /**
@@ -328,6 +336,20 @@ function klattMake(params = new KlattParam()) {
     return synth;
 }
 
+function extendOrTruncate(array, newLength) {
+    const oldLength = array.length;
+
+    // if new_length <= old_length then we truncate and return
+    array.length = newLength;
+
+    // else must extend by duplicating last element
+    if (oldLength < newLength) {
+        for (let i = oldLength; i < newLength; i++) {
+            array[i] = array[oldLength - 1];
+        }
+    }
+}
+
 /***** KLATT SYNTH & PARAMS *****/
 
 class KlattParam {
@@ -336,7 +358,7 @@ class KlattParam {
      * Create a new KlattParam.
      * Bandwidths/frequencies are in Hz.
      * Amplitudes are in dB.
-     * 
+     *
      * @param {number} FS       sample rate (samples/s)     (default 10000)
      * @param {number} N_FORM   number of formants          (default 5)
      * @param {number} DUR      duration (s)                (default 1)
@@ -346,7 +368,7 @@ class KlattParam {
      *      Transformed into 2D array where each row is a formant frequency over time.
      * @param {number[]} BW     formant bandwidths          (default [50, 100, 100, 200, 250])
      *      Transformed into 2D array where each row is a formant bandwidth over time.
-     * 
+     *
      * All the following params generate 1D arrays to allow variance over time:
      * @param {number} AV       voicing ampl                (default 60)
      * @param {number} AVS      quasi-sinusoid voicing ampl (default 0)
@@ -356,7 +378,7 @@ class KlattParam {
      * @param {number} FGP      glottal resonator 1 freq    (default 0)
      * @param {number} BGP      glottal resonator 1 BW      (default 100)
      * @param {number} FGZ      glottal zero freq           (default 1500)
-     * @param {number} BGZ      glottal zero BW             (default 6000)         
+     * @param {number} BGZ      glottal zero BW             (default 6000)
      * @param {number} FNP      nasal pole freq             (default 250)
      * @param {number} BNP      nasal pole BW               (default 100)
      * @param {number} FNZ      nasal zero freq             (default 250)
@@ -378,11 +400,8 @@ class KlattParam {
         FNP = 250, BNP = 100, FNZ = 250, BNZ = 100, BGS = 200,
         A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, AN = 0) {
 
-        this.FS = FS;
-        this.DUR = DUR;
-        this.N_FORM = N_FORM;
-        this.N_SAMP = Math.round(FS * DUR);
-        this.DT = 1 / FS;
+        this.setMetadata(false, DUR, FS, N_FORM);
+
         this.F0 = new Array(this.N_SAMP).fill(F0);
         this.FF = FF.map(f => new Array(this.N_SAMP).fill(f));
         this.BW = BW.map(b => new Array(this.N_SAMP).fill(b));
@@ -409,14 +428,54 @@ class KlattParam {
         this.AN = new Array(this.N_SAMP).fill(AN);
     }
 
-    append(klattParam) {
+    setMetadata(applyToParams, durationS, sampleRate = undefined, numFormants = undefined) {
+        sampleRate = (sampleRate === undefined ? this.FS : sampleRate);
+        numFormants = (numFormants === undefined ? this.N_FORM : numFormants);
+
+        this.FS = sampleRate;
+        this.DUR = durationS;
+        this.N_SAMP = Math.round(this.FS * this.DUR);
+        this.DT = 1 / this.FS;
+        this.N_FORM = numFormants;
+
+        if (applyToParams) {
+            extendOrTruncate(this.F0, this.N_SAMP);
+            this.FF.forEach(f => extendOrTruncate(f, this.N_SAMP));
+            this.BW.forEach(b => extendOrTruncate(b, this.N_SAMP));
+            extendOrTruncate(this.AV, this.N_SAMP);
+            extendOrTruncate(this.AVS, this.N_SAMP);
+            extendOrTruncate(this.AH, this.N_SAMP);
+            extendOrTruncate(this.AF, this.N_SAMP);
+            extendOrTruncate(this.FNZ, this.N_SAMP);
+            extendOrTruncate(this.SW, this.N_SAMP);
+            extendOrTruncate(this.FGP, this.N_SAMP);
+            extendOrTruncate(this.BGP, this.N_SAMP);
+            extendOrTruncate(this.FGZ, this.N_SAMP);
+            extendOrTruncate(this.BGZ, this.N_SAMP);
+            extendOrTruncate(this.FNP, this.N_SAMP);
+            extendOrTruncate(this.BNP, this.N_SAMP);
+            extendOrTruncate(this.BNZ, this.N_SAMP);
+            extendOrTruncate(this.BGS, this.N_SAMP);
+            extendOrTruncate(this.A1, this.N_SAMP);
+            extendOrTruncate(this.A2, this.N_SAMP);
+            extendOrTruncate(this.A3, this.N_SAMP);
+            extendOrTruncate(this.A4, this.N_SAMP);
+            extendOrTruncate(this.A5, this.N_SAMP);
+            extendOrTruncate(this.A6, this.N_SAMP);
+            extendOrTruncate(this.AN, this.N_SAMP);
+        }
+    }
+
+    assertCanAppend(klattParam) {
         if (klattParam.FS !== this.FS || klattParam.N_FORM !== this.N_FORM) {
             throw new Error("Sample rate FS and number of formants N_FORM must be the same to append KlattParam objects");
         }
+    }
 
-        this.DUR += klattParam.DUR;
-        this.N_SAMP = Math.round(this.FS * this.DUR);
-        this.DT = 1 / this.FS;
+    append(klattParam) {
+        this.assertCanAppend(klattParam);
+
+        this.setMetadata(false, this.DUR + klattParam.DUR);
 
         for (let i = 0; i < this.N_FORM; i++) {
             this.FF[i] = this.FF[i].concat(klattParam.FF[i]);
@@ -448,6 +507,80 @@ class KlattParam {
 
         // Enable daisy chaining
         return this;
+    }
+
+    rampTo(klattParam, rampDurationS = 0.25) {
+        this.assertCanAppend(klattParam);
+
+        let ramp = new KlattParam();
+
+        ramp.setMetadata(false, rampDurationS, this.FS, this.N_FORM);
+
+        for (let i = 0; i < ramp.N_FORM; i++) {
+            ramp.FF[i] = linearRamp(this.FF[i], klattParam.FF[i], ramp.N_SAMP);
+            ramp.BW[i] = linearRamp(this.BW[i], klattParam.BW[i], ramp.N_SAMP)
+        }
+
+        ramp.F0 = linearRamp(this.F0, klattParam.F0, ramp.N_SAMP);
+        ramp.AV = linearRamp(this.AV, klattParam.AV, ramp.N_SAMP);
+        ramp.AVS = linearRamp(this.AVS, klattParam.AVS, ramp.N_SAMP);
+        ramp.AH = linearRamp(this.AH, klattParam.AH, ramp.N_SAMP);
+        ramp.AF = linearRamp(this.AF, klattParam.AF, ramp.N_SAMP);
+        ramp.FNZ = linearRamp(this.FNZ, klattParam.FNZ, ramp.N_SAMP);
+        ramp.SW = linearRamp(this.SW, klattParam.SW, ramp.N_SAMP);
+        ramp.FGP = linearRamp(this.FGP, klattParam.FGP, ramp.N_SAMP);
+        ramp.BGP = linearRamp(this.BGP, klattParam.BGP, ramp.N_SAMP);
+        ramp.FGZ = linearRamp(this.FGZ, klattParam.FGZ, ramp.N_SAMP);
+        ramp.BGZ = linearRamp(this.BGZ, klattParam.BGZ, ramp.N_SAMP);
+        ramp.FNP = linearRamp(this.FNP, klattParam.FNP, ramp.N_SAMP);
+        ramp.BNP = linearRamp(this.BNP, klattParam.BNP, ramp.N_SAMP);
+        ramp.BNZ = linearRamp(this.BNZ, klattParam.BNZ, ramp.N_SAMP);
+        ramp.BGS = linearRamp(this.BGS, klattParam.BGS, ramp.N_SAMP);
+        ramp.A1 = linearRamp(this.A1, klattParam.A1, ramp.N_SAMP);
+        ramp.A2 = linearRamp(this.A2, klattParam.A2, ramp.N_SAMP);
+        ramp.A3 = linearRamp(this.A3, klattParam.A3, ramp.N_SAMP);
+        ramp.A4 = linearRamp(this.A4, klattParam.A4, ramp.N_SAMP);
+        ramp.A5 = linearRamp(this.A5, klattParam.A5, ramp.N_SAMP);
+        ramp.A6 = linearRamp(this.A6, klattParam.A6, ramp.N_SAMP);
+        ramp.AN = linearRamp(this.AN, klattParam.AN, ramp.N_SAMP);
+
+        this.append(ramp);
+        this.append(klattParam);
+
+        return this;
+    }
+
+    clone() {
+        let paramsClone = new KlattParam();
+
+        paramsClone.setMetadata(false, this.DUR, this.FS, this.N_FORM);
+
+        paramsClone.F0 = [...this.F0];
+        paramsClone.FF = this.FF.map(f => [...f]);
+        paramsClone.BW = this.BW.map(b => [...b]);
+        paramsClone.AV = [...this.AV];
+        paramsClone.AVS = [...this.AVS];
+        paramsClone.AH = [...this.AH];
+        paramsClone.AF = [...this.AF];
+        paramsClone.FNZ = [...this.FNZ];
+        paramsClone.SW = [...this.SW];
+        paramsClone.FGP = [...this.FGP];
+        paramsClone.BGP = [...this.BGP];
+        paramsClone.FGZ = [...this.FGZ];
+        paramsClone.BGZ = [...this.BGZ];
+        paramsClone.FNP = [...this.FNP];
+        paramsClone.BNP = [...this.BNP];
+        paramsClone.BNZ = [...this.BNZ];
+        paramsClone.BGS = [...this.BGS];
+        paramsClone.A1 = [...this.A1];
+        paramsClone.A2 = [...this.A2];
+        paramsClone.A3 = [...this.A3];
+        paramsClone.A4 = [...this.A4];
+        paramsClone.A5 = [...this.A5];
+        paramsClone.A6 = [...this.A6];
+        paramsClone.AN = [...this.AN];
+
+        return paramsClone;
     }
 }
 
@@ -671,7 +804,7 @@ class KlattSection {
     patch() {
         throw new Error("UNIMPLEMENTED: This KlattSection has no patch() implementation!");
     }
-    
+
     /**
      * Section dependent. Should run this section's components and
      * set the inputs of this section's output buffers.
@@ -741,7 +874,7 @@ class KlattNoise extends KlattSection {
     do() {
         this.noisegen.generate();
         this.lowpass.filter();
-        this.amp.amplify(-60);  // TODO: -60 might not be real value
+        this.amp.amplify(-130);  // TODO: -60 might not be real value
 
         console.log("KlattNoise outputs", [...this.amp.output])
     }
@@ -1226,14 +1359,15 @@ const PHONES = {
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
     "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
-    "s": new Fricative().setAF(60).setAmp(6, 52),
-    "z": new Fricative().setAV(60).setAF(60).setAmp(6, 52),
-    "ʃ": new Fricative().setAF(55).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
-    "ʒ": new Fricative().setAF(53).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53])
+    "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
+    "z": new Fricative().setAF(60).setAV(60).setAmp(6, 52),
+    "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
+    "ʒ": new Fricative().setAF(53).setAV(60).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53])
 };
 
 export async function playWord(word) {
     let params = null;
+    let lastPhoneParams = null;
 
     for (let i = 0; i < word.length; i++) {
         let grapheme = word[i];
@@ -1250,18 +1384,45 @@ export async function playWord(word) {
 
         let phone = PHONES[grapheme]
         if (phone !== undefined) {
+            // Fade in on first phone
             if (params === null) {
-                params = phone.makeParams();
+                lastPhoneParams = phone.makeParams();
+
+                // Create "stub" params w/the same values,
+                //  just shorter & w/amplitudes of 0
+                params = lastPhoneParams.clone();
+                params.setMetadata(true, 0.01);
+                params.AV = new Array(params.N_SAMP).fill(0);
+                params.AF = new Array(params.N_SAMP).fill(0);
+
+                // Ramp from stub to real params
+                // Creates fade in effect w/o changing phone quality
+                params.rampTo(lastPhoneParams, 0.05);
             }
             else {
-                params = params.append(phone.makeParams());
+                lastPhoneParams = phone.makeParams();
+                params.rampTo(lastPhoneParams, 0.02);
             }
         }
     }
 
-    if (params !== null) {
-        const synth = klattMake(params);
-        synth.run();
-        await synth.play();
+    if (params === null) {
+        console.log("No legal phones in word");
+        return;
     }
+
+    // Fade out after last phone
+    const tailStub = lastPhoneParams.clone();
+    tailStub.setMetadata(true, 0.01);
+    tailStub.AV = new Array(tailStub.N_SAMP).fill(0);
+    tailStub.AF = new Array(tailStub.N_SAMP).fill(0);
+
+    params.rampTo(tailStub, 0.05);
+
+    // Consistant F0 fall across whole word
+    params.F0 = linearSequence(120, 70, params.N_SAMP);
+
+    const synth = klattMake(params);
+    synth.run();
+    await synth.play();
 }
