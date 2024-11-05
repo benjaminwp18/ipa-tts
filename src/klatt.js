@@ -1134,8 +1134,12 @@ const PHONES = {
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
     "ɛ": new Monophthong([620, 1660, 2430], [70, 130, 300]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
-    "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
+    "ɑ": new Monophthong([700, 1220, 2600], [130, 70, 160]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
+    "ʌ": new Monophthong([700, 1220, 2570], [70, 50, 140]),
+    "a": new Monophthong([700, 1560, 2430], [70, 130, 320]),
+    "ɒ": new Monophthong([620, 850, 2570], [70, 50, 140]),
+    "ə": new Monophthong([460, 1400, 2570], [90, 110, 80])
 };
 
 export async function playWord(word) {
