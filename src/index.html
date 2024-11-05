@@ -8,6 +8,7 @@
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
             import { main } from "./main.js";
+            import * as Klatt from "./klatt.js";
             const overlay = document.getElementById('overlay');
             overlay.addEventListener('click', main);
             overlay.addEventListener('animationend', () => {
