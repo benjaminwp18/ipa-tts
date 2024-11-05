@@ -1140,6 +1140,27 @@ const PHONES = {
     "a": new Monophthong([700, 1560, 2430], [70, 130, 320]),
     "ɒ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ə": new Monophthong([460, 1400, 2570], [90, 110, 80])
+    /*
+    ADD VOWELS TODO
+    "y": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɨ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ʉ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɯ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "u": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ʏ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "e": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ø": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɘ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɵ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɤ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "o": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "œ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɜ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɞ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɔ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɐ": new Monophthong([0, 0, 0], [0, 0, 0]),
+    "ɶ": new Monophthong([0, 0, 0], [0, 0, 0])
+    */
 };
 
 export async function playWord(word) {
