@@ -1,45 +1,52 @@
-async function testKlatt() {
-    s = klattMake(new KlattParam());
+let ctx = null;
 
-    N = s.params["N_SAMP"];
-    FF = s.params["FF"];
-    BW = s.params["BW"];
+/**
+ * Must be called before trying to use any other functions in this module.
+ * saves the given audio context to use for all audio operations.
+ * @param {AudioContext} context
+ */
+export function init(context) {
+    ctx = context;
+}
 
-    s.params["AV"].fill(60);
-    s.params["F0"] = linearSequence(120, 70, N);
+class Phone {
+    makeParams() { }
+}
 
-    // rrrrrrrrrrrr
-    // FF[0].fill(310);
-    // FF[1].fill(1060);
-    // FF[2].fill(1380);
-    // BW[0].fill(70);
-    // BW[1].fill(100);
-    // BW[2].fill(120);
+class Monophthong {
+    constructor(formantFreqs, bandwidths) {
+        if (formantFreqs.length !== bandwidths.length) {
+            throw new Error("Number of frequencies and number of bandwidths must be the same" +
+                `(${formantFreqs.length} !== ${bandwidths.length})`)
+        }
 
-    // iiiiiijjjjjj
-    // FF[0] = linearSequence(310, 290, N);
-    // FF[1] = linearSequence(2020, 2070, N);
-    // FF[2] = linearSequence(2960, 2960, N);
-    // BW[0] = linearSequence(45, 60, N);
-    // BW[1] = linearSequence(200, 200, N);
-    // BW[2] = linearSequence(400, 400, N);
+        this.formantFreqs = formantFreqs;
+        this.bandwidths = bandwidths;
+    }
 
-    // iiiijjjjrrrr
-    FF[0] = piecewiseLinearSequence([310, 300, 290, 310, 310], N);
-    FF[1] = piecewiseLinearSequence([2020, 2045, 2070, 1060, 1060], N);
-    FF[2] = piecewiseLinearSequence([2960, 2960, 2960, 1380, 1380], N);
-    BW[0] = piecewiseLinearSequence([45, 52, 60, 70, 70], N);
-    BW[1] = piecewiseLinearSequence([200, 200, 200, 100, 100], N);
-    BW[2] = piecewiseLinearSequence([400, 400, 400, 120, 120], N);
+    makeParams() {
+        let params = new KlattParam();
+        const N = params.N_SAMP;
+        let FF = params.FF;
+        let BW = params.BW;
 
-    s.run();
-    await s.play();
+        if (FF.length < this.formantFreqs.length) {
+            throw new Error(`Cannot have more than ${FF.length} formants`);
+        }
+
+        params.AV.fill(60);
+        params.F0 = linearSequence(120, 70, N);
+
+        for (let i = 0; i < this.formantFreqs.length; i++) {
+            FF[i].fill(this.formantFreqs[i]);
+            BW[i].fill(this.bandwidths[i]);
+        }
+
+        return params;
+    }
 }
 
 /***** HELPERS *****/
-
-// https://github.com/chdh/klatt-syn-app/blob/master/src/InternalAudioPlayer.ts
-const offlineAudioContext = new OfflineAudioContext(1, 1, 44100);
 
 /**
  * Asynchronously play the provided samples as audio at the given sample rate.
@@ -48,7 +55,7 @@ const offlineAudioContext = new OfflineAudioContext(1, 1, 44100);
  */
 async function playSamples(samples, sampleRate) {
     // Convert samples to audio context buffer
-    const buffer = offlineAudioContext.createBuffer(1, samples.length, sampleRate);
+    const buffer = ctx.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
     // buffer.copyToChannel(samples, 0);
     const data = buffer.getChannelData(0);
@@ -57,10 +64,9 @@ async function playSamples(samples, sampleRate) {
     }
 
     // Play the buffer
-    const audioContext = new AudioContext();
-    const sourceNode = audioContext.createBufferSource();
+    const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
-    sourceNode.connect(audioContext.destination);
+    sourceNode.connect(ctx.destination);
     sourceNode.start();
 }
 
@@ -312,6 +318,47 @@ class KlattParam {
         this.A6 = new Array(this.N_SAMP).fill(A6);
         this.AN = new Array(this.N_SAMP).fill(AN);
     }
+
+    append(klattParam) {
+        if (klattParam.FS !== this.FS || klattParam.N_FORM !== this.N_FORM) {
+            throw new Error("Sample rate FS and number of formants N_FORM must be the same to append KlattParam objects");
+        }
+
+        this.DUR += klattParam.DUR;
+        this.N_SAMP = Math.round(this.FS * this.DUR);
+        this.DT = 1 / this.FS;
+
+        for (let i = 0; i < this.N_FORM; i++) {
+            this.FF[i] = this.FF[i].concat(klattParam.FF[i]);
+            this.BW[i] = this.BW[i].concat(klattParam.BW[i]);
+        }
+
+        this.F0 = this.F0.concat(klattParam.F0);
+        this.AV = this.AV.concat(klattParam.AV);
+        this.AVS = this.AVS.concat(klattParam.AVS);
+        this.AH = this.AH.concat(klattParam.AH);
+        this.AF = this.AF.concat(klattParam.AF);
+        this.FNZ = this.FNZ.concat(klattParam.FNZ);
+        this.SW = this.SW.concat(klattParam.SW);
+        this.FGP = this.FGP.concat(klattParam.FGP);
+        this.BGP = this.BGP.concat(klattParam.BGP);
+        this.FGZ = this.FGZ.concat(klattParam.FGZ);
+        this.BGZ = this.BGZ.concat(klattParam.BGZ);
+        this.FNP = this.FNP.concat(klattParam.FNP);
+        this.BNP = this.BNP.concat(klattParam.BNP);
+        this.BNZ = this.BNZ.concat(klattParam.BNZ);
+        this.BGS = this.BGS.concat(klattParam.BGS);
+        this.A1 = this.A1.concat(klattParam.A1);
+        this.A2 = this.A2.concat(klattParam.A2);
+        this.A3 = this.A3.concat(klattParam.A3);
+        this.A4 = this.A4.concat(klattParam.A4);
+        this.A5 = this.A5.concat(klattParam.A5);
+        this.A6 = this.A6.concat(klattParam.A6);
+        this.AN = this.AN.concat(klattParam.AN);
+
+        // Enable daisy chaining
+        return this;
+    }
 }
 
 class KlattSynth {
@@ -445,9 +492,10 @@ class KlattComponent {
     send() {
         console.log(`\t${this.constructor.name} sends`, [
             ...this.output.slice(0, 4),
-            '||',
+            "||",
             ...this.output.slice(-4)
         ]);
+
         for (const dest of this.dests) {
             dest.receive([...this.output]);
         }
@@ -581,10 +629,10 @@ class KlattVoice extends KlattSection {
         this.mixer.mix();
         this.switch.operate(this.mast.params["SW"]);
 
-        console.log("KlattVoice outputs", [...this.switch.output])
+        console.log("KlattVoice outputs", [...this.switch.output]);
     }
 }
-  
+
 class KlattNoise extends KlattSection {
     constructor(mast) {
         super(mast);
@@ -880,7 +928,6 @@ class Resonator extends KlattComponent {
 class Impulse extends KlattComponent {
     constructor(mast) {
         super(mast);
-        this.lastGlotPulse = 0;
     }
 
     /**
@@ -893,11 +940,11 @@ class Impulse extends KlattComponent {
             glotPeriod.push(Math.round(this.mast.params["FS"] / F0El));
         }
 
-        this.lastGlotPulse = 0;
+        let lastGlotPulse = 0;
         for (let i = 0; i < this.mast.params["N_SAMP"]; i++) {
-            if (i - this.lastGlotPulse >= glotPeriod[i]) {
+            if (i - lastGlotPulse >= glotPeriod[i]) {
                 this.output[i] = 1;
-                this.lastGlotPulse = i;
+                lastGlotPulse = i;
             }
         }
 
@@ -1073,5 +1120,54 @@ class Switch extends KlattComponent {
         this.output = [];
         this.output.push(new Array(this.mast.params["N_SAMP"]).fill(0));
         this.output.push(new Array(this.mast.params["N_SAMP"]).fill(0));
+    }
+}
+
+// Some chars have multiple identical-looking unicode values
+const REPLACEMENTS = {
+    "ε": "ɛ"  // Greek epsilon -> Latin epsilon
+}
+
+const PHONES = {
+    "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
+    "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
+    "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
+    "ɛ": new Monophthong([620, 1660, 2430], [70, 130, 300]),
+    "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
+    "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
+    "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
+};
+
+export async function playWord(word) {
+    let params = null;
+
+    for (let i = 0; i < word.length; i++) {
+        let grapheme = word[i];
+
+        grapheme = REPLACEMENTS[grapheme] || grapheme;
+
+        // Converts ə˞  to ɚ ("rrrrr")
+        // TODO: do a single sweep through the whole string to create
+        //       grapheme objects with properties describing their diacritics
+        if (grapheme === "ə" && i < word.length - 1 && word[i+1] === "˞") {
+            grapheme = "ɚ";
+            i++;
+        }
+
+        let phone = PHONES[grapheme]
+        if (phone !== undefined) {
+            if (params === null) {
+                params = phone.makeParams();
+            }
+            else {
+                params = params.append(phone.makeParams());
+            }
+        }
+    }
+
+    if (params !== null) {
+        const synth = klattMake(params);
+        synth.run();
+        await synth.play();
     }
 }
