@@ -392,7 +392,7 @@ class KlattParam {
      * @param {number} A6       parallel formant 6 ampl     (default 0)
      * @param {number} AN       nasal formant ampl          (default 0)
      */
-    constructor(FS = 10000, N_FORM = 5, DUR = 0.5, F0 = 100,
+    constructor(FS = 10000, N_FORM = 6, DUR = 0.5, F0 = 100,
         FF = [500, 1500, 2500, 3500, 4500, 4900],
         BW = [50, 100, 100, 200, 250, 1000],
         AV = 60, AVS = 0, AH = 0, AF = 0,
