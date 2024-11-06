@@ -393,8 +393,8 @@ class KlattParam {
      * @param {number} AN       nasal formant ampl          (default 0)
      */
     constructor(FS = 10000, N_FORM = 5, DUR = 0.5, F0 = 100,
-        FF = [500, 1500, 2500, 3500, 4500],
-        BW = [50, 100, 100, 200, 250],
+        FF = [500, 1500, 2500, 3500, 4500, 4900],
+        BW = [50, 100, 100, 200, 250, 1000],
         AV = 60, AVS = 0, AH = 0, AF = 0,
         SW = 0, FGP = 0, BGP = 100, FGZ = 1500, BGZ = 6000,
         FNP = 250, BNP = 100, FNZ = 250, BNZ = 100, BGS = 200,
@@ -968,7 +968,7 @@ class KlattParallel extends KlattSection {
         this.a3.connect([this.r3]);
         this.a4.connect([this.r4]);
         this.a5.connect([this.r5]);
-        this.r6.connect([this.r6]);
+        this.a6.connect([this.r6]);
         const finalComponents = [this.r1, this.r2, this.r3, this.r4, this.r5, this.r6, this.rnp, this.ab];
         for (const component of finalComponents) {
             component.connect([this.outputMixer]);
@@ -992,6 +992,8 @@ class KlattParallel extends KlattSection {
         this.r4.resonate(this.mast.params["FF"][3], this.mast.params["BW"][3]);
         this.a5.amplify(this.mast.params["A5"]);
         this.r5.resonate(this.mast.params["FF"][4], this.mast.params["BW"][4]);
+        this.a6.amplify(this.mast.params["A6"]);
+        this.r6.resonate(this.mast.params["FF"][5], this.mast.params["BW"][5]);
         this.outputMixer.mix();
 
         console.log("KlattParallel outputs", [...this.outputMixer.output])
