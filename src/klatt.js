@@ -1142,24 +1142,24 @@ const PHONES = {
     "ə": new Monophthong([460, 1400, 2570], [90, 110, 80])
     /*
     ADD VOWELS TODO
-    "y": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɨ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ʉ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɯ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "u": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ʏ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "e": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ø": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɘ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɵ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɤ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "o": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "œ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɜ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɞ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɔ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɐ": new Monophthong([0, 0, 0], [0, 0, 0]),
-    "ɶ": new Monophthong([0, 0, 0], [0, 0, 0])
+    "y": new Monophthong([310, 1700, 2400], [50, 100, 200]),
+    "ɨ": new Monophthong([440, 1800, 2800], [60, 120, 300]),
+    "ʉ": new Monophthong([320, 1600, 2400], [50, 100, 250]),
+    "ɯ": new Monophthong([320, 1300, 2200], [60, 110, 180]),
+    "u": new Monophthong([300, 870, 2240], [50, 90, 180]),
+    "ʏ": new Monophthong([360, 1900, 2500], [70, 120, 200]),
+    "e": new Monophthong([500, 1800, 2600], [60, 110, 300]),
+    "ø": new Monophthong([450, 1600, 2400], [60, 100, 200]),
+    "ɘ": new Monophthong([470, 1400, 2400], [70, 130, 210]),
+    "ɵ": new Monophthong([450, 1200, 2200], [70, 110, 200]),
+    "ɤ": new Monophthong([460, 1300, 2200], [80, 110, 180]),
+    "o": new Monophthong([460, 800, 2300], [70, 80, 200]),
+    "œ": new Monophthong([550, 1500, 2400], [70, 120, 200]),
+    "ɜ": new Monophthong([550, 1400, 2400], [80, 110, 200]),
+    "ɞ": new Monophthong([540, 1300, 2200], [80, 110, 200]),
+    "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
+    "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
+    "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250])
     */
 };
 
