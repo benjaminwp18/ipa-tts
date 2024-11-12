@@ -1373,13 +1373,15 @@ const PHONES = {
     "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
-    "z": new Fricative().setAF(60).setAV(60).setAmp(6, 52),
+    "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
-    "ʒ": new Fricative().setAF(53).setAV(60).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
+    "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]), // changed AV from 60
+    
+    // TODO: not sure how to fix these
     "f": new Fricative().setAF(60).setAV(0).setAB(57),
-    "v": new Fricative().setAF(60).setAV(60).setAB(57),
+    "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
-    "ð": new Fricative().setAF(50).setAV(60).setAmp(6, 27).setAB(48),
+    "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
 };
 
 export async function playWord(word) {
