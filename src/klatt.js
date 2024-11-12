@@ -21,6 +21,7 @@ class Fricative {
         this.A4 = 0;
         this.A5 = 0;
         this.A6 = 0;
+        this.AB = 0;
     }
 
     setAF(AF) {
@@ -35,6 +36,11 @@ class Fricative {
 
     setAV(AV) {
         this.AV = AV;
+        return this;
+    }
+
+    setAB(AB) {
+        this.AB = AB;
         return this;
     }
 
@@ -95,7 +101,7 @@ class Fricative {
         params.A5.fill(this.A5);
         params.A6.fill(this.A6);
 
-        // params.AB = this.AB;
+        params.AB.fill(this.AB);
         params.AV.fill(this.AV);
         params.AF.fill(this.AF);  // TODO: AF seems to dominate noise from AV (for voiced C)
         params.AH.fill(this.AH);
@@ -303,7 +309,7 @@ function gaussianRandomArray(size=1, mean=0, stdev=1) {
 const PARAM_NAMES = [
     "FS", "DUR", "N_FORM", "N_SAMP", "DT", "F0", "FF", "BW", "AV", "AVS", "AH",
     "AF", "FNZ", "SW", "FGP", "BGP", "FGZ", "BGZ", "FNP", "BNP", "BNZ", "BGS", "A1",
-    "A2", "A3", "A4", "A5", "A6", "AN"
+    "A2", "A3", "A4", "A5", "A6", "AB", "AN"
 ];
 
 // TODO: this klattMake/KlattParam workflow is really awkward.
@@ -390,15 +396,16 @@ class KlattParam {
      * @param {number} A4       parallel formant 4 ampl     (default 0)
      * @param {number} A5       parallel formant 5 ampl     (default 0)
      * @param {number} A6       parallel formant 6 ampl     (default 0)
+     * @param {number} AB       bypass path ampl            (default 0)
      * @param {number} AN       nasal formant ampl          (default 0)
      */
-    constructor(FS = 10000, N_FORM = 5, DUR = 0.5, F0 = 100,
-        FF = [500, 1500, 2500, 3500, 4500],
-        BW = [50, 100, 100, 200, 250],
+    constructor(FS = 10000, N_FORM = 6, DUR = 0.5, F0 = 100,
+        FF = [500, 1500, 2500, 3500, 4500, 4900],
+        BW = [50, 100, 100, 200, 250, 1000],
         AV = 60, AVS = 0, AH = 0, AF = 0,
         SW = 0, FGP = 0, BGP = 100, FGZ = 1500, BGZ = 6000,
         FNP = 250, BNP = 100, FNZ = 250, BNZ = 100, BGS = 200,
-        A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, AN = 0) {
+        A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, AB=0, AN = 0) {
 
         this.setMetadata(false, DUR, FS, N_FORM);
 
@@ -425,6 +432,7 @@ class KlattParam {
         this.A4 = new Array(this.N_SAMP).fill(A4);
         this.A5 = new Array(this.N_SAMP).fill(A5);
         this.A6 = new Array(this.N_SAMP).fill(A6);
+        this.AB = new Array(this.N_SAMP).fill(AB);
         this.AN = new Array(this.N_SAMP).fill(AN);
     }
 
@@ -462,6 +470,7 @@ class KlattParam {
             extendOrTruncate(this.A4, this.N_SAMP);
             extendOrTruncate(this.A5, this.N_SAMP);
             extendOrTruncate(this.A6, this.N_SAMP);
+            extendOrTruncate(this.AB, this.N_SAMP);
             extendOrTruncate(this.AN, this.N_SAMP);
         }
     }
@@ -503,6 +512,7 @@ class KlattParam {
         this.A4 = this.A4.concat(klattParam.A4);
         this.A5 = this.A5.concat(klattParam.A5);
         this.A6 = this.A6.concat(klattParam.A6);
+        this.AB = this.AB.concat(klattParam.AB);
         this.AN = this.AN.concat(klattParam.AN);
 
         // Enable daisy chaining
@@ -542,6 +552,7 @@ class KlattParam {
         ramp.A4 = linearRamp(this.A4, klattParam.A4, ramp.N_SAMP);
         ramp.A5 = linearRamp(this.A5, klattParam.A5, ramp.N_SAMP);
         ramp.A6 = linearRamp(this.A6, klattParam.A6, ramp.N_SAMP);
+        ramp.AB = linearRamp(this.AB, klattParam.AB, ramp.N_SAMP);
         ramp.AN = linearRamp(this.AN, klattParam.AN, ramp.N_SAMP);
 
         this.append(ramp);
@@ -578,6 +589,7 @@ class KlattParam {
         paramsClone.A4 = [...this.A4];
         paramsClone.A5 = [...this.A5];
         paramsClone.A6 = [...this.A6];
+        paramsClone.AB = [...this.AB];
         paramsClone.AN = [...this.AN];
 
         return paramsClone;
@@ -598,19 +610,19 @@ class KlattSynth {
 
         // Create synthesis parameters array
         const paramList = [
-            "F0", "AV", "OQ", "SQ", "TL", "FL", // Source
-            "DI", "AVS", "AV", "AF", "AH",      // Source
-            "FF", "BW",                         // Formants
-            "FGP", "BGP", "FGZ", "BGZ", "BGS",  // Glottal pole/zero
-            "FNP", "BNP", "FNZ", "BNZ",         // Nasal pole/zero
-            "FTP", "BTP", "FTZ", "BTZ",         // Tracheal pole/zero
-            "A2F", "A3F", "A4F", "A5F", "A6F",  // Frication parallel
-            "B2F", "B3F", "B4F", "B5F", "B6F",  // Frication parallel
-            "A1V", "A2V", "A3V", "A4V", "ATV",  // Voicing parallel
-            "A1", "A2", "A3", "A4", "A5", "AN", // 1980 parallel
-            "ANV",                              // Voicing parallel
-            "SW", "INV_SAMP",                   // Synth settings
-            "N_SAMP", "FS", "DT"                // Synth settings
+            "F0", "AV", "OQ", "SQ", "TL", "FL",             // Source
+            "DI", "AVS", "AV", "AF", "AH",                  // Source
+            "FF", "BW",                                     // Formants
+            "FGP", "BGP", "FGZ", "BGZ", "BGS",              // Glottal pole/zero
+            "FNP", "BNP", "FNZ", "BNZ",                     // Nasal pole/zero
+            "FTP", "BTP", "FTZ", "BTZ",                     // Tracheal pole/zero
+            "A2F", "A3F", "A4F", "A5F", "A6F",              // Frication parallel
+            "B2F", "B3F", "B4F", "B5F", "B6F",              // Frication parallel
+            "A1V", "A2V", "A3V", "A4V", "ATV",              // Voicing parallel
+            "A1", "A2", "A3", "A4", "A5", "A6", "AB", "AN", // 1980 parallel
+            "ANV",                                          // Voicing parallel
+            "SW", "INV_SAMP",                               // Synth settings
+            "N_SAMP", "FS", "DT"                            // Synth settings
         ];
 
         // Initialize params with null values
@@ -939,8 +951,6 @@ class KlattParallel extends KlattSection {
         this.r4 = new Resonator(mast);
         this.a5 = new Amplifier(mast);
         this.r5 = new Resonator(mast);
-        // TODO: 6th formant currently not part of this.do()! Not sure what values
-        // to give to it... need to keep reading Klatt 1980.
         this.a6 = new Amplifier(mast);
         this.r6 = new Resonator(mast);
         // TODO: ab currently not part of this.do()! Not sure what values to give
@@ -968,7 +978,7 @@ class KlattParallel extends KlattSection {
         this.a3.connect([this.r3]);
         this.a4.connect([this.r4]);
         this.a5.connect([this.r5]);
-        this.r6.connect([this.r6]);
+        this.a6.connect([this.r6]);
         const finalComponents = [this.r1, this.r2, this.r3, this.r4, this.r5, this.r6, this.rnp, this.ab];
         for (const component of finalComponents) {
             component.connect([this.outputMixer]);
@@ -992,6 +1002,9 @@ class KlattParallel extends KlattSection {
         this.r4.resonate(this.mast.params["FF"][3], this.mast.params["BW"][3]);
         this.a5.amplify(this.mast.params["A5"]);
         this.r5.resonate(this.mast.params["FF"][4], this.mast.params["BW"][4]);
+        this.a6.amplify(this.mast.params["A6"]);
+        this.r6.resonate(this.mast.params["FF"][5], this.mast.params["BW"][5]);
+        this.ab.amplify(this.mast.params["AB"]);
         this.outputMixer.mix();
 
         console.log("KlattParallel outputs", [...this.outputMixer.output])
@@ -1360,9 +1373,15 @@ const PHONES = {
     "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
-    "z": new Fricative().setAF(60).setAV(60).setAmp(6, 52),
+    "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
-    "ʒ": new Fricative().setAF(53).setAV(60).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53])
+    "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]), // changed AV from 60
+    
+    // TODO: not sure how to fix these
+    "f": new Fricative().setAF(60).setAV(0).setAB(57),
+    "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
+    "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
+    "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
 };
 
 export async function playWord(word) {
