@@ -1139,9 +1139,7 @@ const PHONES = {
     "ʌ": new Monophthong([700, 1220, 2570], [70, 50, 140]),
     "a": new Monophthong([700, 1560, 2430], [70, 130, 320]),
     "ɒ": new Monophthong([620, 850, 2570], [70, 50, 140]),
-    "ə": new Monophthong([460, 1400, 2570], [90, 110, 80])
-    /*
-    ADD VOWELS TODO
+    "ə": new Monophthong([460, 1400, 2570], [90, 110, 80]),
     "y": new Monophthong([310, 1700, 2400], [50, 100, 200]),
     "ɨ": new Monophthong([440, 1800, 2800], [60, 120, 300]),
     "ʉ": new Monophthong([320, 1600, 2400], [50, 100, 250]),
@@ -1160,7 +1158,6 @@ const PHONES = {
     "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
     "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250])
-    */
 };
 
 export async function playWord(word) {
