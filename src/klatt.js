@@ -113,7 +113,7 @@ class Fricative {
     }
 }
 
-class Monophthong {
+class Vocoid {
     constructor(formantFreqs, bandwidths) {
         if (formantFreqs.length !== bandwidths.length) {
             throw new Error("Number of frequencies and number of bandwidths must be the same" +
@@ -124,7 +124,7 @@ class Monophthong {
         this.bandwidths = bandwidths;
     }
 
-    makeParams() {
+    makeParams(amplitude, duration = 500) {
         let params = new KlattParam();
         const N = params.N_SAMP;
         let FF = params.FF;
@@ -134,7 +134,9 @@ class Monophthong {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        params.AV.fill(60);
+        params.setMetadata(true, duration / 1000);
+
+        params.AV.fill(amplitude);
         params.F0 = linearSequence(120, 70, N);
 
         for (let i = 0; i < this.formantFreqs.length; i++) {
@@ -143,6 +145,27 @@ class Monophthong {
         }
 
         return params;
+    }
+}
+
+class Monophthong extends Vocoid {
+    constructor(formantFreqs, bandwidths) {
+        super(formantFreqs, bandwidths);
+    }
+
+    makeParams() {
+        return super.makeParams(60);
+    }
+}
+
+class Sonorant extends Vocoid {
+    constructor(formantFreqs, bandwidths, duration = 150) {
+        super(formantFreqs, bandwidths);
+        this.duration = duration;
+    }
+
+    makeParams() {
+        return super.makeParams(50, this.duration);
     }
 }
 
@@ -1382,6 +1405,11 @@ const PHONES = {
     "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
+
+    "l": new Sonorant([310, 1050, 2880], [50, 100, 280]),
+    "r": new Sonorant([310, 1060, 1380], [70, 100, 120]),
+    "w": new Sonorant([290, 610, 2150], [50, 80, 60]),
+    "y": new Sonorant([260, 2070, 3020], [40, 250, 500]),
 };
 
 export async function playWord(word) {
