@@ -1316,7 +1316,7 @@ const PHONES = {
     "ɞ": new Monophthong([540, 1300, 2200], [80, 110, 200]),
     "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
     "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
-    "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250])
+    "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
     "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
