@@ -359,6 +359,23 @@ function extendOrTruncate(array, newLength) {
 /***** KLATT SYNTH & PARAMS *****/
 
 class KlattParam {
+    static DEFAULTS = {
+        FS: 10000, N_FORM: 6, DUR: 0.5, F0: 100,
+        FF: [500, 1500, 2500, 3500, 4500, 4900],
+        BW: [50, 100, 100, 200, 250, 1000],
+        AV: 60, AVS: 0, AH: 0, AF: 0,
+        SW: 0,
+        FGP: 0, BGP: 100, FGZ: 1500, BGZ: 6000, FNP: 250,
+        BNP: 100, FNZ: 250, BNZ: 100, BGS: 200,
+        A1: 0, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0,
+        AB: 0, AN: 0
+    };
+
+    static EXPECTED_SCALAR_PARAMS = ["FS", "DUR", "N_FORM"];
+    static ALL_SCALAR_PARAMS = ["FS", "DUR", "N_SAMP", "DT", "N_FORM"];
+    static ARRAY_PARAMS = ["F0", "AV", "AVS", "AH", "AF", "FNZ", "SW", "FGP", "BGP", "FGZ", "BGZ", "FNP", "BNP", "BNZ", "BGS", "A1", "A2", "A3", "A4", "A5", "A6", "AB", "AN"];
+    static FORMANT_MATRICES = ["FF", "BW"];
+
     // TODO: Named params doesn't work in JS. Use a dict?
     /**
      * Create a new KlattParam.
@@ -367,7 +384,7 @@ class KlattParam {
      *
      * @param {number} FS       sample rate (samples/s)     (default 10000)
      * @param {number} N_FORM   number of formants          (default 5)
-     * @param {number} DUR      duration (s)                (default 1)
+     * @param {number} DUR      duration (s)                (default 0.5)
      * @param {number} F0       fundemental (Hz)            (default 100)
      *      Transformed into array of F0 over time.
      * @param {number[]} FF     formants (Hz)               (default [500, 1500, 2500, 3500, 4500])
@@ -399,41 +416,22 @@ class KlattParam {
      * @param {number} AB       bypass path ampl            (default 0)
      * @param {number} AN       nasal formant ampl          (default 0)
      */
-    constructor(FS = 10000, N_FORM = 6, DUR = 0.5, F0 = 100,
-        FF = [500, 1500, 2500, 3500, 4500, 4900],
-        BW = [50, 100, 100, 200, 250, 1000],
-        AV = 60, AVS = 0, AH = 0, AF = 0,
-        SW = 0, FGP = 0, BGP = 100, FGZ = 1500, BGZ = 6000,
-        FNP = 250, BNP = 100, FNZ = 250, BNZ = 100, BGS = 200,
-        A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, AB=0, AN = 0) {
+    constructor(rawParamObject = {}) {
+        // Apply defaults
+        let params = {};
+        for (const [key, defaultValue] of Object.entries(KlattParam.DEFAULTS)) {
+            params[key] = (key in rawParamObject) ? rawParamObject[key] : defaultValue;
+        }
 
-        this.setMetadata(false, DUR, FS, N_FORM);
+        this.setMetadata(false, params.DUR, params.FS, params.N_FORM);
 
-        this.F0 = new Array(this.N_SAMP).fill(F0);
-        this.FF = FF.map(f => new Array(this.N_SAMP).fill(f));
-        this.BW = BW.map(b => new Array(this.N_SAMP).fill(b));
-        this.AV = new Array(this.N_SAMP).fill(AV);
-        this.AVS = new Array(this.N_SAMP).fill(AVS);
-        this.AH = new Array(this.N_SAMP).fill(AH);
-        this.AF = new Array(this.N_SAMP).fill(AF);
-        this.FNZ = new Array(this.N_SAMP).fill(FNZ);
-        this.SW = new Array(this.N_SAMP).fill(SW);
-        this.FGP = new Array(this.N_SAMP).fill(FGP);
-        this.BGP = new Array(this.N_SAMP).fill(BGP);
-        this.FGZ = new Array(this.N_SAMP).fill(FGZ);
-        this.BGZ = new Array(this.N_SAMP).fill(BGZ);
-        this.FNP = new Array(this.N_SAMP).fill(FNP);
-        this.BNP = new Array(this.N_SAMP).fill(BNP);
-        this.BNZ = new Array(this.N_SAMP).fill(BNZ);
-        this.BGS = new Array(this.N_SAMP).fill(BGS);
-        this.A1 = new Array(this.N_SAMP).fill(A1);
-        this.A2 = new Array(this.N_SAMP).fill(A2);
-        this.A3 = new Array(this.N_SAMP).fill(A3);
-        this.A4 = new Array(this.N_SAMP).fill(A4);
-        this.A5 = new Array(this.N_SAMP).fill(A5);
-        this.A6 = new Array(this.N_SAMP).fill(A6);
-        this.AB = new Array(this.N_SAMP).fill(AB);
-        this.AN = new Array(this.N_SAMP).fill(AN);
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            this[param] = new Array(this.N_SAMP).fill(params[param]);
+        }
+
+        for (const matrix of KlattParam.FORMANT_MATRICES) {
+            this[matrix] = params[matrix].map(entry => new Array(this.N_SAMP).fill(entry));
+        }
     }
 
     setMetadata(applyToParams, durationS, sampleRate = undefined, numFormants = undefined) {
@@ -447,31 +445,14 @@ class KlattParam {
         this.N_FORM = numFormants;
 
         if (applyToParams) {
-            extendOrTruncate(this.F0, this.N_SAMP);
-            this.FF.forEach(f => extendOrTruncate(f, this.N_SAMP));
-            this.BW.forEach(b => extendOrTruncate(b, this.N_SAMP));
-            extendOrTruncate(this.AV, this.N_SAMP);
-            extendOrTruncate(this.AVS, this.N_SAMP);
-            extendOrTruncate(this.AH, this.N_SAMP);
-            extendOrTruncate(this.AF, this.N_SAMP);
-            extendOrTruncate(this.FNZ, this.N_SAMP);
-            extendOrTruncate(this.SW, this.N_SAMP);
-            extendOrTruncate(this.FGP, this.N_SAMP);
-            extendOrTruncate(this.BGP, this.N_SAMP);
-            extendOrTruncate(this.FGZ, this.N_SAMP);
-            extendOrTruncate(this.BGZ, this.N_SAMP);
-            extendOrTruncate(this.FNP, this.N_SAMP);
-            extendOrTruncate(this.BNP, this.N_SAMP);
-            extendOrTruncate(this.BNZ, this.N_SAMP);
-            extendOrTruncate(this.BGS, this.N_SAMP);
-            extendOrTruncate(this.A1, this.N_SAMP);
-            extendOrTruncate(this.A2, this.N_SAMP);
-            extendOrTruncate(this.A3, this.N_SAMP);
-            extendOrTruncate(this.A4, this.N_SAMP);
-            extendOrTruncate(this.A5, this.N_SAMP);
-            extendOrTruncate(this.A6, this.N_SAMP);
-            extendOrTruncate(this.AB, this.N_SAMP);
-            extendOrTruncate(this.AN, this.N_SAMP);
+            for (const param of KlattParam.ARRAY_PARAMS) {
+                extendOrTruncate(this[param], this.N_SAMP);
+            }
+
+            for (const matrix of KlattParam.FORMANT_MATRICES) {
+                this[matrix].forEach(row => extendOrTruncate(row, this.N_SAMP));
+            }
+            console.warn(this.FGP);
         }
     }
 
@@ -491,29 +472,9 @@ class KlattParam {
             this.BW[i] = this.BW[i].concat(klattParam.BW[i]);
         }
 
-        this.F0 = this.F0.concat(klattParam.F0);
-        this.AV = this.AV.concat(klattParam.AV);
-        this.AVS = this.AVS.concat(klattParam.AVS);
-        this.AH = this.AH.concat(klattParam.AH);
-        this.AF = this.AF.concat(klattParam.AF);
-        this.FNZ = this.FNZ.concat(klattParam.FNZ);
-        this.SW = this.SW.concat(klattParam.SW);
-        this.FGP = this.FGP.concat(klattParam.FGP);
-        this.BGP = this.BGP.concat(klattParam.BGP);
-        this.FGZ = this.FGZ.concat(klattParam.FGZ);
-        this.BGZ = this.BGZ.concat(klattParam.BGZ);
-        this.FNP = this.FNP.concat(klattParam.FNP);
-        this.BNP = this.BNP.concat(klattParam.BNP);
-        this.BNZ = this.BNZ.concat(klattParam.BNZ);
-        this.BGS = this.BGS.concat(klattParam.BGS);
-        this.A1 = this.A1.concat(klattParam.A1);
-        this.A2 = this.A2.concat(klattParam.A2);
-        this.A3 = this.A3.concat(klattParam.A3);
-        this.A4 = this.A4.concat(klattParam.A4);
-        this.A5 = this.A5.concat(klattParam.A5);
-        this.A6 = this.A6.concat(klattParam.A6);
-        this.AB = this.AB.concat(klattParam.AB);
-        this.AN = this.AN.concat(klattParam.AN);
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            this[param] = this[param].concat(klattParam[param]);
+        }
 
         // Enable daisy chaining
         return this;
@@ -528,32 +489,12 @@ class KlattParam {
 
         for (let i = 0; i < ramp.N_FORM; i++) {
             ramp.FF[i] = linearRamp(this.FF[i], klattParam.FF[i], ramp.N_SAMP);
-            ramp.BW[i] = linearRamp(this.BW[i], klattParam.BW[i], ramp.N_SAMP)
+            ramp.BW[i] = linearRamp(this.BW[i], klattParam.BW[i], ramp.N_SAMP);
         }
 
-        ramp.F0 = linearRamp(this.F0, klattParam.F0, ramp.N_SAMP);
-        ramp.AV = linearRamp(this.AV, klattParam.AV, ramp.N_SAMP);
-        ramp.AVS = linearRamp(this.AVS, klattParam.AVS, ramp.N_SAMP);
-        ramp.AH = linearRamp(this.AH, klattParam.AH, ramp.N_SAMP);
-        ramp.AF = linearRamp(this.AF, klattParam.AF, ramp.N_SAMP);
-        ramp.FNZ = linearRamp(this.FNZ, klattParam.FNZ, ramp.N_SAMP);
-        ramp.SW = linearRamp(this.SW, klattParam.SW, ramp.N_SAMP);
-        ramp.FGP = linearRamp(this.FGP, klattParam.FGP, ramp.N_SAMP);
-        ramp.BGP = linearRamp(this.BGP, klattParam.BGP, ramp.N_SAMP);
-        ramp.FGZ = linearRamp(this.FGZ, klattParam.FGZ, ramp.N_SAMP);
-        ramp.BGZ = linearRamp(this.BGZ, klattParam.BGZ, ramp.N_SAMP);
-        ramp.FNP = linearRamp(this.FNP, klattParam.FNP, ramp.N_SAMP);
-        ramp.BNP = linearRamp(this.BNP, klattParam.BNP, ramp.N_SAMP);
-        ramp.BNZ = linearRamp(this.BNZ, klattParam.BNZ, ramp.N_SAMP);
-        ramp.BGS = linearRamp(this.BGS, klattParam.BGS, ramp.N_SAMP);
-        ramp.A1 = linearRamp(this.A1, klattParam.A1, ramp.N_SAMP);
-        ramp.A2 = linearRamp(this.A2, klattParam.A2, ramp.N_SAMP);
-        ramp.A3 = linearRamp(this.A3, klattParam.A3, ramp.N_SAMP);
-        ramp.A4 = linearRamp(this.A4, klattParam.A4, ramp.N_SAMP);
-        ramp.A5 = linearRamp(this.A5, klattParam.A5, ramp.N_SAMP);
-        ramp.A6 = linearRamp(this.A6, klattParam.A6, ramp.N_SAMP);
-        ramp.AB = linearRamp(this.AB, klattParam.AB, ramp.N_SAMP);
-        ramp.AN = linearRamp(this.AN, klattParam.AN, ramp.N_SAMP);
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            ramp[param] = linearRamp(this[param], klattParam[param], ramp.N_SAMP);
+        }
 
         this.append(ramp);
         this.append(klattParam);
@@ -566,31 +507,13 @@ class KlattParam {
 
         paramsClone.setMetadata(false, this.DUR, this.FS, this.N_FORM);
 
-        paramsClone.F0 = [...this.F0];
-        paramsClone.FF = this.FF.map(f => [...f]);
-        paramsClone.BW = this.BW.map(b => [...b]);
-        paramsClone.AV = [...this.AV];
-        paramsClone.AVS = [...this.AVS];
-        paramsClone.AH = [...this.AH];
-        paramsClone.AF = [...this.AF];
-        paramsClone.FNZ = [...this.FNZ];
-        paramsClone.SW = [...this.SW];
-        paramsClone.FGP = [...this.FGP];
-        paramsClone.BGP = [...this.BGP];
-        paramsClone.FGZ = [...this.FGZ];
-        paramsClone.BGZ = [...this.BGZ];
-        paramsClone.FNP = [...this.FNP];
-        paramsClone.BNP = [...this.BNP];
-        paramsClone.BNZ = [...this.BNZ];
-        paramsClone.BGS = [...this.BGS];
-        paramsClone.A1 = [...this.A1];
-        paramsClone.A2 = [...this.A2];
-        paramsClone.A3 = [...this.A3];
-        paramsClone.A4 = [...this.A4];
-        paramsClone.A5 = [...this.A5];
-        paramsClone.A6 = [...this.A6];
-        paramsClone.AB = [...this.AB];
-        paramsClone.AN = [...this.AN];
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            paramsClone[param] = [...this[param]];
+        }
+
+        for (const matrix of KlattParam.FORMANT_MATRICES) {
+            paramsClone[matrix] = this[matrix].map(row => [...row]);
+        }
 
         return paramsClone;
     }
