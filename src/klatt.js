@@ -1,12 +1,91 @@
 let ctx = null;
+let audio_dst;
 
 /**
  * Must be called before trying to use any other functions in this module.
  * saves the given audio context to use for all audio operations.
  * @param {AudioContext} context
+ * @param {AudioNode} dst_node
  */
-export function init(context) {
+export function init(context, dst_node = null) {
     ctx = context;
+    if(dst_node === null) {
+        audio_dst = ctx.destination;
+    } else {
+        audio_dst = dst_node;
+        audio_dst.connect(ctx.destination);
+    }
+}
+
+class Nasal {
+    constructor(formantFreqs, bandwidths, antiformants, duration_ms = 150) {
+        if (formantFreqs.length !== bandwidths.length) {
+            throw new Error(
+                `Number of formant frequencies (${formantFreqs.length}) and bandwidths (${bandwidths.length}) must match.`
+            );
+        }
+
+        this.formantFreqs = formantFreqs;
+        this.bandwidths = bandwidths;
+        this.antiformants = antiformants;
+        this.duration_ms = duration_ms;
+        this.AV = 60;
+        this.AN = 40;
+        this.AF = 0;
+    }
+
+    setAV(AV) {
+        this.AV = AV;
+        return this;
+    }
+
+    setAN(AN) {
+        this.AN = AN;
+        return this;
+    }
+
+    setDuration(duration_ms) {
+        this.duration_ms = duration_ms;
+        return this;
+    }
+
+    makeParams() {
+        let params = new KlattParam();
+        params.setMetadata(true, this.duration_ms / 1000);
+
+        const N = params.N_SAMP;
+        let FF = params.FF;
+        let BW = params.BW;
+        let AF = params.AN;
+
+        if (FF.length < this.formantFreqs.length || BW.length < this.bandwidths.length) {
+            throw new Error(
+                `Insufficient formant slots in KlattParam (supports ${FF.length} formants).`
+            );
+        }
+
+        if (AF.length < this.antiformants.length) {
+            throw new Error(
+                `Insufficient antiformant slots in KlattParam (supports ${AF.length} antiformants).`
+            );
+        }
+
+        params.F0 = linearSequence(120, 70, N);
+
+        for (let i = 0; i < this.formantFreqs.length; i++) {
+            FF[i] = Array(N).fill(this.formantFreqs[i]);
+            BW[i] = Array(N).fill(this.bandwidths[i]);
+        }
+
+        for (let i = 0; i < this.antiformants.length; i++) {
+            AF[i] = Array(N).fill(this.antiformants[i]);
+        }
+
+        params.AV = Array(N).fill(this.AV);
+        params.AN = Array(N).fill(this.AN);
+
+        return params;
+    }
 }
 
 class Fricative {
@@ -176,7 +255,7 @@ class Sonorant extends Vocoid {
  * @param {Array} samples float array of samples
  * @param {number} sampleRate integer sample rate, should be 10000 for Klatt
  */
-async function playSamples(samples, sampleRate) {
+async function playSamples(ctx, samples, sampleRate) {
     // Convert samples to audio context buffer
     const buffer = ctx.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
@@ -189,7 +268,7 @@ async function playSamples(samples, sampleRate) {
     // Play the buffer
     const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
-    sourceNode.connect(ctx.destination);
+    sourceNode.connect(audio_dst);
     sourceNode.start();
 }
 
@@ -382,6 +461,23 @@ function extendOrTruncate(array, newLength) {
 /***** KLATT SYNTH & PARAMS *****/
 
 class KlattParam {
+    static DEFAULTS = {
+        FS: 10000, N_FORM: 6, DUR: 0.5, F0: 100,
+        FF: [500, 1500, 2500, 3500, 4500, 4900],
+        BW: [50, 100, 100, 200, 250, 1000],
+        AV: 60, AVS: 0, AH: 0, AF: 0,
+        SW: 0,
+        FGP: 0, BGP: 100, FGZ: 1500, BGZ: 6000, FNP: 250,
+        BNP: 100, FNZ: 250, BNZ: 100, BGS: 200,
+        A1: 0, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0,
+        AB: 0, AN: 0
+    };
+
+    static EXPECTED_SCALAR_PARAMS = ["FS", "DUR", "N_FORM"];
+    static ALL_SCALAR_PARAMS = ["FS", "DUR", "N_SAMP", "DT", "N_FORM"];
+    static ARRAY_PARAMS = ["F0", "AV", "AVS", "AH", "AF", "FNZ", "SW", "FGP", "BGP", "FGZ", "BGZ", "FNP", "BNP", "BNZ", "BGS", "A1", "A2", "A3", "A4", "A5", "A6", "AB", "AN"];
+    static FORMANT_MATRICES = ["FF", "BW"];
+
     // TODO: Named params doesn't work in JS. Use a dict?
     /**
      * Create a new KlattParam.
@@ -390,7 +486,7 @@ class KlattParam {
      *
      * @param {number} FS       sample rate (samples/s)     (default 10000)
      * @param {number} N_FORM   number of formants          (default 5)
-     * @param {number} DUR      duration (s)                (default 1)
+     * @param {number} DUR      duration (s)                (default 0.5)
      * @param {number} F0       fundemental (Hz)            (default 100)
      *      Transformed into array of F0 over time.
      * @param {number[]} FF     formants (Hz)               (default [500, 1500, 2500, 3500, 4500])
@@ -422,41 +518,22 @@ class KlattParam {
      * @param {number} AB       bypass path ampl            (default 0)
      * @param {number} AN       nasal formant ampl          (default 0)
      */
-    constructor(FS = 10000, N_FORM = 6, DUR = 0.5, F0 = 100,
-        FF = [500, 1500, 2500, 3500, 4500, 4900],
-        BW = [50, 100, 100, 200, 250, 1000],
-        AV = 60, AVS = 0, AH = 0, AF = 0,
-        SW = 0, FGP = 0, BGP = 100, FGZ = 1500, BGZ = 6000,
-        FNP = 250, BNP = 100, FNZ = 250, BNZ = 100, BGS = 200,
-        A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, AB=0, AN = 0) {
+    constructor(rawParamObject = {}) {
+        // Apply defaults
+        let params = {};
+        for (const [key, defaultValue] of Object.entries(KlattParam.DEFAULTS)) {
+            params[key] = (key in rawParamObject) ? rawParamObject[key] : defaultValue;
+        }
 
-        this.setMetadata(false, DUR, FS, N_FORM);
+        this.setMetadata(false, params.DUR, params.FS, params.N_FORM);
 
-        this.F0 = new Array(this.N_SAMP).fill(F0);
-        this.FF = FF.map(f => new Array(this.N_SAMP).fill(f));
-        this.BW = BW.map(b => new Array(this.N_SAMP).fill(b));
-        this.AV = new Array(this.N_SAMP).fill(AV);
-        this.AVS = new Array(this.N_SAMP).fill(AVS);
-        this.AH = new Array(this.N_SAMP).fill(AH);
-        this.AF = new Array(this.N_SAMP).fill(AF);
-        this.FNZ = new Array(this.N_SAMP).fill(FNZ);
-        this.SW = new Array(this.N_SAMP).fill(SW);
-        this.FGP = new Array(this.N_SAMP).fill(FGP);
-        this.BGP = new Array(this.N_SAMP).fill(BGP);
-        this.FGZ = new Array(this.N_SAMP).fill(FGZ);
-        this.BGZ = new Array(this.N_SAMP).fill(BGZ);
-        this.FNP = new Array(this.N_SAMP).fill(FNP);
-        this.BNP = new Array(this.N_SAMP).fill(BNP);
-        this.BNZ = new Array(this.N_SAMP).fill(BNZ);
-        this.BGS = new Array(this.N_SAMP).fill(BGS);
-        this.A1 = new Array(this.N_SAMP).fill(A1);
-        this.A2 = new Array(this.N_SAMP).fill(A2);
-        this.A3 = new Array(this.N_SAMP).fill(A3);
-        this.A4 = new Array(this.N_SAMP).fill(A4);
-        this.A5 = new Array(this.N_SAMP).fill(A5);
-        this.A6 = new Array(this.N_SAMP).fill(A6);
-        this.AB = new Array(this.N_SAMP).fill(AB);
-        this.AN = new Array(this.N_SAMP).fill(AN);
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            this[param] = new Array(this.N_SAMP).fill(params[param]);
+        }
+
+        for (const matrix of KlattParam.FORMANT_MATRICES) {
+            this[matrix] = params[matrix].map(entry => new Array(this.N_SAMP).fill(entry));
+        }
     }
 
     setMetadata(applyToParams, durationS, sampleRate = undefined, numFormants = undefined) {
@@ -470,31 +547,14 @@ class KlattParam {
         this.N_FORM = numFormants;
 
         if (applyToParams) {
-            extendOrTruncate(this.F0, this.N_SAMP);
-            this.FF.forEach(f => extendOrTruncate(f, this.N_SAMP));
-            this.BW.forEach(b => extendOrTruncate(b, this.N_SAMP));
-            extendOrTruncate(this.AV, this.N_SAMP);
-            extendOrTruncate(this.AVS, this.N_SAMP);
-            extendOrTruncate(this.AH, this.N_SAMP);
-            extendOrTruncate(this.AF, this.N_SAMP);
-            extendOrTruncate(this.FNZ, this.N_SAMP);
-            extendOrTruncate(this.SW, this.N_SAMP);
-            extendOrTruncate(this.FGP, this.N_SAMP);
-            extendOrTruncate(this.BGP, this.N_SAMP);
-            extendOrTruncate(this.FGZ, this.N_SAMP);
-            extendOrTruncate(this.BGZ, this.N_SAMP);
-            extendOrTruncate(this.FNP, this.N_SAMP);
-            extendOrTruncate(this.BNP, this.N_SAMP);
-            extendOrTruncate(this.BNZ, this.N_SAMP);
-            extendOrTruncate(this.BGS, this.N_SAMP);
-            extendOrTruncate(this.A1, this.N_SAMP);
-            extendOrTruncate(this.A2, this.N_SAMP);
-            extendOrTruncate(this.A3, this.N_SAMP);
-            extendOrTruncate(this.A4, this.N_SAMP);
-            extendOrTruncate(this.A5, this.N_SAMP);
-            extendOrTruncate(this.A6, this.N_SAMP);
-            extendOrTruncate(this.AB, this.N_SAMP);
-            extendOrTruncate(this.AN, this.N_SAMP);
+            for (const param of KlattParam.ARRAY_PARAMS) {
+                extendOrTruncate(this[param], this.N_SAMP);
+            }
+
+            for (const matrix of KlattParam.FORMANT_MATRICES) {
+                this[matrix].forEach(row => extendOrTruncate(row, this.N_SAMP));
+            }
+            console.warn(this.FGP);
         }
     }
 
@@ -514,29 +574,9 @@ class KlattParam {
             this.BW[i] = this.BW[i].concat(klattParam.BW[i]);
         }
 
-        this.F0 = this.F0.concat(klattParam.F0);
-        this.AV = this.AV.concat(klattParam.AV);
-        this.AVS = this.AVS.concat(klattParam.AVS);
-        this.AH = this.AH.concat(klattParam.AH);
-        this.AF = this.AF.concat(klattParam.AF);
-        this.FNZ = this.FNZ.concat(klattParam.FNZ);
-        this.SW = this.SW.concat(klattParam.SW);
-        this.FGP = this.FGP.concat(klattParam.FGP);
-        this.BGP = this.BGP.concat(klattParam.BGP);
-        this.FGZ = this.FGZ.concat(klattParam.FGZ);
-        this.BGZ = this.BGZ.concat(klattParam.BGZ);
-        this.FNP = this.FNP.concat(klattParam.FNP);
-        this.BNP = this.BNP.concat(klattParam.BNP);
-        this.BNZ = this.BNZ.concat(klattParam.BNZ);
-        this.BGS = this.BGS.concat(klattParam.BGS);
-        this.A1 = this.A1.concat(klattParam.A1);
-        this.A2 = this.A2.concat(klattParam.A2);
-        this.A3 = this.A3.concat(klattParam.A3);
-        this.A4 = this.A4.concat(klattParam.A4);
-        this.A5 = this.A5.concat(klattParam.A5);
-        this.A6 = this.A6.concat(klattParam.A6);
-        this.AB = this.AB.concat(klattParam.AB);
-        this.AN = this.AN.concat(klattParam.AN);
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            this[param] = this[param].concat(klattParam[param]);
+        }
 
         // Enable daisy chaining
         return this;
@@ -551,32 +591,12 @@ class KlattParam {
 
         for (let i = 0; i < ramp.N_FORM; i++) {
             ramp.FF[i] = linearRamp(this.FF[i], klattParam.FF[i], ramp.N_SAMP);
-            ramp.BW[i] = linearRamp(this.BW[i], klattParam.BW[i], ramp.N_SAMP)
+            ramp.BW[i] = linearRamp(this.BW[i], klattParam.BW[i], ramp.N_SAMP);
         }
 
-        ramp.F0 = linearRamp(this.F0, klattParam.F0, ramp.N_SAMP);
-        ramp.AV = linearRamp(this.AV, klattParam.AV, ramp.N_SAMP);
-        ramp.AVS = linearRamp(this.AVS, klattParam.AVS, ramp.N_SAMP);
-        ramp.AH = linearRamp(this.AH, klattParam.AH, ramp.N_SAMP);
-        ramp.AF = linearRamp(this.AF, klattParam.AF, ramp.N_SAMP);
-        ramp.FNZ = linearRamp(this.FNZ, klattParam.FNZ, ramp.N_SAMP);
-        ramp.SW = linearRamp(this.SW, klattParam.SW, ramp.N_SAMP);
-        ramp.FGP = linearRamp(this.FGP, klattParam.FGP, ramp.N_SAMP);
-        ramp.BGP = linearRamp(this.BGP, klattParam.BGP, ramp.N_SAMP);
-        ramp.FGZ = linearRamp(this.FGZ, klattParam.FGZ, ramp.N_SAMP);
-        ramp.BGZ = linearRamp(this.BGZ, klattParam.BGZ, ramp.N_SAMP);
-        ramp.FNP = linearRamp(this.FNP, klattParam.FNP, ramp.N_SAMP);
-        ramp.BNP = linearRamp(this.BNP, klattParam.BNP, ramp.N_SAMP);
-        ramp.BNZ = linearRamp(this.BNZ, klattParam.BNZ, ramp.N_SAMP);
-        ramp.BGS = linearRamp(this.BGS, klattParam.BGS, ramp.N_SAMP);
-        ramp.A1 = linearRamp(this.A1, klattParam.A1, ramp.N_SAMP);
-        ramp.A2 = linearRamp(this.A2, klattParam.A2, ramp.N_SAMP);
-        ramp.A3 = linearRamp(this.A3, klattParam.A3, ramp.N_SAMP);
-        ramp.A4 = linearRamp(this.A4, klattParam.A4, ramp.N_SAMP);
-        ramp.A5 = linearRamp(this.A5, klattParam.A5, ramp.N_SAMP);
-        ramp.A6 = linearRamp(this.A6, klattParam.A6, ramp.N_SAMP);
-        ramp.AB = linearRamp(this.AB, klattParam.AB, ramp.N_SAMP);
-        ramp.AN = linearRamp(this.AN, klattParam.AN, ramp.N_SAMP);
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            ramp[param] = linearRamp(this[param], klattParam[param], ramp.N_SAMP);
+        }
 
         this.append(ramp);
         this.append(klattParam);
@@ -589,31 +609,13 @@ class KlattParam {
 
         paramsClone.setMetadata(false, this.DUR, this.FS, this.N_FORM);
 
-        paramsClone.F0 = [...this.F0];
-        paramsClone.FF = this.FF.map(f => [...f]);
-        paramsClone.BW = this.BW.map(b => [...b]);
-        paramsClone.AV = [...this.AV];
-        paramsClone.AVS = [...this.AVS];
-        paramsClone.AH = [...this.AH];
-        paramsClone.AF = [...this.AF];
-        paramsClone.FNZ = [...this.FNZ];
-        paramsClone.SW = [...this.SW];
-        paramsClone.FGP = [...this.FGP];
-        paramsClone.BGP = [...this.BGP];
-        paramsClone.FGZ = [...this.FGZ];
-        paramsClone.BGZ = [...this.BGZ];
-        paramsClone.FNP = [...this.FNP];
-        paramsClone.BNP = [...this.BNP];
-        paramsClone.BNZ = [...this.BNZ];
-        paramsClone.BGS = [...this.BGS];
-        paramsClone.A1 = [...this.A1];
-        paramsClone.A2 = [...this.A2];
-        paramsClone.A3 = [...this.A3];
-        paramsClone.A4 = [...this.A4];
-        paramsClone.A5 = [...this.A5];
-        paramsClone.A6 = [...this.A6];
-        paramsClone.AB = [...this.AB];
-        paramsClone.AN = [...this.AN];
+        for (const param of KlattParam.ARRAY_PARAMS) {
+            paramsClone[param] = [...this[param]];
+        }
+
+        for (const matrix of KlattParam.FORMANT_MATRICES) {
+            paramsClone[matrix] = this[matrix].map(row => [...row]);
+        }
 
         return paramsClone;
     }
@@ -713,10 +715,10 @@ class KlattSynth {
     /**
      * Play the output of this synth.
      */
-    async play() {
+    async play(ctx) {
         console.log("Final output: ", this.output);
 
-        await playSamples(this.output, 10000);
+        await playSamples(ctx, this.output, 10000);
     }
 }
 
@@ -976,15 +978,13 @@ class KlattParallel extends KlattSection {
         this.r5 = new Resonator(mast);
         this.a6 = new Amplifier(mast);
         this.r6 = new Resonator(mast);
-        // TODO: ab currently not part of this.do()! Not sure what values to give
-        // to it... need to keep reading Klatt 1980.
         this.ab = new Amplifier(mast);
         this.outputMixer = new Mixer(mast);
 
         this.components = [
-            this.af, this.a1, this.r1, this.firstDiff, this.mixer, this.an, 
-            this.rnp, this.a2, this.r2, this.r1, this.firstDiff, this.mixer, 
-            this.an, this.rnp, this.a2, this.r2, this.a3, this.r3, this.a4, 
+            this.af, this.a1, this.r1, this.firstDiff, this.mixer, this.an,
+            this.rnp, this.a2, this.r2, this.r1, this.firstDiff, this.mixer,
+            this.an, this.rnp, this.a2, this.r2, this.a3, this.r3, this.a4,
             this.r4, this.a5, this.r5, this.a6, this.r6, this.ab, this.outputMixer
         ];
     }
@@ -1393,8 +1393,30 @@ const PHONES = {
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
     "ɛ": new Monophthong([620, 1660, 2430], [70, 130, 300]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
-    "ɑ": new Monophthong([620, 850, 2570], [70, 50, 140]),
+    "ɑ": new Monophthong([700, 1220, 2600], [130, 70, 160]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
+    "ʌ": new Monophthong([700, 1220, 2570], [70, 50, 140]),
+    "a": new Monophthong([700, 1560, 2430], [70, 130, 320]),
+    "ɒ": new Monophthong([620, 850, 2570], [70, 50, 140]),
+    "ə": new Monophthong([460, 1400, 2570], [90, 110, 80]),
+    "y": new Monophthong([310, 1700, 2400], [50, 100, 200]),
+    "ɨ": new Monophthong([320, 1700, 2300], [60, 120, 300]),
+    "ʉ": new Monophthong([320, 1600, 2400], [50, 100, 250]),
+    "ɯ": new Monophthong([320, 1300, 2200], [60, 110, 180]),
+    "u": new Monophthong([300, 870, 2240], [50, 90, 180]),
+    "ʏ": new Monophthong([360, 1900, 2500], [70, 120, 200]),
+    "e": new Monophthong([500, 1800, 2600], [60, 110, 300]),
+    "ø": new Monophthong([450, 1600, 2400], [60, 100, 200]),
+    "ɘ": new Monophthong([470, 1400, 2400], [70, 130, 210]),
+    "ɵ": new Monophthong([450, 1200, 2200], [70, 110, 200]),
+    "ɤ": new Monophthong([460, 1300, 2200], [80, 110, 180]),
+    "o": new Monophthong([340, 800, 2300], [70, 80, 200]),
+    "œ": new Monophthong([550, 1500, 2400], [70, 120, 200]),
+    "ɜ": new Monophthong([550, 1400, 2400], [80, 110, 200]),
+    "ɞ": new Monophthong([540, 1300, 2200], [80, 110, 200]),
+    "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
+    "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
+    "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
     "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
@@ -1410,9 +1432,19 @@ const PHONES = {
     "r": new Sonorant([310, 1060, 1380], [70, 100, 120]),
     "w": new Sonorant([290, 610, 2150], [50, 80, 60]),
     "j": new Sonorant([260, 2070, 3020], [40, 250, 500]),
+
+    //Nasals
+    "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
+    "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140], [450, 1300]),
+    "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160], [400, 1300]),
+    //TODO: N sounds needs work
+    "n": new Nasal([300, 1600, 2400], [50, 70, 140], [750, 1750]),
+    "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150], [650, 1650]),
+    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170], [850, 1850]), 
+    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140], [650, 1550]), 
 };
 
-export async function playWord(word) {
+export async function playWord(ctx, word) {
     let params = null;
     let lastPhoneParams = null;
 
@@ -1471,5 +1503,5 @@ export async function playWord(word) {
 
     const synth = klattMake(params);
     synth.run();
-    await synth.play();
+    await synth.play(ctx);
 }
