@@ -1,12 +1,20 @@
 let ctx = null;
+let audio_dst;
 
 /**
  * Must be called before trying to use any other functions in this module.
  * saves the given audio context to use for all audio operations.
  * @param {AudioContext} context
+ * @param {AudioNode} dst_node
  */
-export function init(context) {
+export function init(context, dst_node = null) {
     ctx = context;
+    if(dst_node === null) {
+        audio_dst = ctx.destination;
+    } else {
+        audio_dst = dst_node;
+        audio_dst.connect(ctx.destination);
+    }
 }
 
 class Phone {
@@ -53,7 +61,7 @@ class Monophthong {
  * @param {Array} samples float array of samples
  * @param {number} sampleRate integer sample rate, should be 10000 for Klatt
  */
-async function playSamples(samples, sampleRate) {
+async function playSamples(ctx, samples, sampleRate) {
     // Convert samples to audio context buffer
     const buffer = ctx.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
@@ -66,7 +74,7 @@ async function playSamples(samples, sampleRate) {
     // Play the buffer
     const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
-    sourceNode.connect(ctx.destination);
+    sourceNode.connect(audio_dst);
     sourceNode.start();
 }
 
@@ -455,10 +463,10 @@ class KlattSynth {
     /**
      * Play the output of this synth.
      */
-    async play() {
+    async play(ctx) {
         console.log("Final output: ", this.output);
 
-        await playSamples(this.output, 10000);
+        await playSamples(ctx, this.output, 10000);
     }
 }
 
@@ -1138,7 +1146,7 @@ const PHONES = {
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
 };
 
-export async function playWord(word) {
+export async function playWord(ctx, word) {
     let params = null;
 
     for (let i = 0; i < word.length; i++) {
@@ -1168,6 +1176,6 @@ export async function playWord(word) {
     if (params !== null) {
         const synth = klattMake(params);
         synth.run();
-        await synth.play();
+        await synth.play(ctx);
     }
 }
