@@ -1,12 +1,91 @@
 let ctx = null;
+let audio_dst;
 
 /**
  * Must be called before trying to use any other functions in this module.
  * saves the given audio context to use for all audio operations.
  * @param {AudioContext} context
+ * @param {AudioNode} dst_node
  */
-export function init(context) {
+export function init(context, dst_node = null) {
     ctx = context;
+    if(dst_node === null) {
+        audio_dst = ctx.destination;
+    } else {
+        audio_dst = dst_node;
+        audio_dst.connect(ctx.destination);
+    }
+}
+
+class Nasal {
+    constructor(formantFreqs, bandwidths, antiformants, duration_ms = 150) {
+        if (formantFreqs.length !== bandwidths.length) {
+            throw new Error(
+                `Number of formant frequencies (${formantFreqs.length}) and bandwidths (${bandwidths.length}) must match.`
+            );
+        }
+
+        this.formantFreqs = formantFreqs;
+        this.bandwidths = bandwidths;
+        this.antiformants = antiformants;
+        this.duration_ms = duration_ms;
+        this.AV = 60;
+        this.AN = 40;
+        this.AF = 0;
+    }
+
+    setAV(AV) {
+        this.AV = AV;
+        return this;
+    }
+
+    setAN(AN) {
+        this.AN = AN;
+        return this;
+    }
+
+    setDuration(duration_ms) {
+        this.duration_ms = duration_ms;
+        return this;
+    }
+
+    makeParams() {
+        let params = new KlattParam();
+        params.setMetadata(true, this.duration_ms / 1000);
+
+        const N = params.N_SAMP;
+        let FF = params.FF;
+        let BW = params.BW;
+        let AF = params.AN;
+
+        if (FF.length < this.formantFreqs.length || BW.length < this.bandwidths.length) {
+            throw new Error(
+                `Insufficient formant slots in KlattParam (supports ${FF.length} formants).`
+            );
+        }
+
+        if (AF.length < this.antiformants.length) {
+            throw new Error(
+                `Insufficient antiformant slots in KlattParam (supports ${AF.length} antiformants).`
+            );
+        }
+
+        params.F0 = linearSequence(120, 70, N);
+
+        for (let i = 0; i < this.formantFreqs.length; i++) {
+            FF[i] = Array(N).fill(this.formantFreqs[i]);
+            BW[i] = Array(N).fill(this.bandwidths[i]);
+        }
+
+        for (let i = 0; i < this.antiformants.length; i++) {
+            AF[i] = Array(N).fill(this.antiformants[i]);
+        }
+
+        params.AV = Array(N).fill(this.AV);
+        params.AN = Array(N).fill(this.AN);
+
+        return params;
+    }
 }
 
 class Fricative {
@@ -153,7 +232,7 @@ class Monophthong {
  * @param {Array} samples float array of samples
  * @param {number} sampleRate integer sample rate, should be 10000 for Klatt
  */
-async function playSamples(samples, sampleRate) {
+async function playSamples(ctx, samples, sampleRate) {
     // Convert samples to audio context buffer
     const buffer = ctx.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
@@ -166,7 +245,7 @@ async function playSamples(samples, sampleRate) {
     // Play the buffer
     const sourceNode = ctx.createBufferSource();
     sourceNode.buffer = buffer;
-    sourceNode.connect(ctx.destination);
+    sourceNode.connect(audio_dst);
     sourceNode.start();
 }
 
@@ -613,10 +692,10 @@ class KlattSynth {
     /**
      * Play the output of this synth.
      */
-    async play() {
+    async play(ctx) {
         console.log("Final output: ", this.output);
 
-        await playSamples(this.output, 10000);
+        await playSamples(ctx, this.output, 10000);
     }
 }
 
@@ -876,15 +955,13 @@ class KlattParallel extends KlattSection {
         this.r5 = new Resonator(mast);
         this.a6 = new Amplifier(mast);
         this.r6 = new Resonator(mast);
-        // TODO: ab currently not part of this.do()! Not sure what values to give
-        // to it... need to keep reading Klatt 1980.
         this.ab = new Amplifier(mast);
         this.outputMixer = new Mixer(mast);
 
         this.components = [
-            this.af, this.a1, this.r1, this.firstDiff, this.mixer, this.an, 
-            this.rnp, this.a2, this.r2, this.r1, this.firstDiff, this.mixer, 
-            this.an, this.rnp, this.a2, this.r2, this.a3, this.r3, this.a4, 
+            this.af, this.a1, this.r1, this.firstDiff, this.mixer, this.an,
+            this.rnp, this.a2, this.r2, this.r1, this.firstDiff, this.mixer,
+            this.an, this.rnp, this.a2, this.r2, this.a3, this.r3, this.a4,
             this.r4, this.a5, this.r5, this.a6, this.r6, this.ab, this.outputMixer
         ];
     }
@@ -1327,9 +1404,19 @@ const PHONES = {
     "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
+
+    //Nasals
+    "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
+    "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140], [450, 1300]),
+    "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160], [400, 1300]),
+    //TODO: N sounds needs work
+    "n": new Nasal([300, 1600, 2400], [50, 70, 140], [750, 1750]),
+    "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150], [650, 1650]),
+    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170], [850, 1850]), 
+    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140], [650, 1550]), 
 };
 
-export async function playWord(word) {
+export async function playWord(ctx, word) {
     let params = null;
     let lastPhoneParams = null;
 
@@ -1388,5 +1475,5 @@ export async function playWord(word) {
 
     const synth = klattMake(params);
     synth.run();
-    await synth.play();
+    await synth.play(ctx);
 }
