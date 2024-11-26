@@ -165,7 +165,7 @@ class Sonorant extends Vocoid {
     }
 
     makeParams() {
-        return super.makeParams(50, this.duration);
+        return super.makeParams(55, this.duration);
     }
 }
 
@@ -1409,7 +1409,7 @@ const PHONES = {
     "l": new Sonorant([310, 1050, 2880], [50, 100, 280]),
     "r": new Sonorant([310, 1060, 1380], [70, 100, 120]),
     "w": new Sonorant([290, 610, 2150], [50, 80, 60]),
-    "y": new Sonorant([260, 2070, 3020], [40, 250, 500]),
+    "j": new Sonorant([260, 2070, 3020], [40, 250, 500]),
 };
 
 export async function playWord(word) {
