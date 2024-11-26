@@ -6,7 +6,6 @@ export class Spectrogram {
         this.analyzerNode = ctx.createAnalyser();
         this.analyzerNode.fftSize = 1024;
         this.analyzerNode.smoothingTimeConstant = 0;
-        ctx.destination.connect(this.analyzerNode);
     }
 
     start() {

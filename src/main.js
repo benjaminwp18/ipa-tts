@@ -14,7 +14,7 @@ export function main() {
 
 	let ctx = new AudioContext();
 	let spectrogram = new Spectrogram(ctx, document.getElementById("spectrogram"));
-	Klatt.init(ctx, spectrogram);
+	Klatt.init(ctx, spectrogram.analyzerNode);
 
 
 	let soundButton = document.getElementById("make-sound-button");
