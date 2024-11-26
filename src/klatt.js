@@ -876,15 +876,13 @@ class KlattParallel extends KlattSection {
         this.r5 = new Resonator(mast);
         this.a6 = new Amplifier(mast);
         this.r6 = new Resonator(mast);
-        // TODO: ab currently not part of this.do()! Not sure what values to give
-        // to it... need to keep reading Klatt 1980.
         this.ab = new Amplifier(mast);
         this.outputMixer = new Mixer(mast);
 
         this.components = [
-            this.af, this.a1, this.r1, this.firstDiff, this.mixer, this.an, 
-            this.rnp, this.a2, this.r2, this.r1, this.firstDiff, this.mixer, 
-            this.an, this.rnp, this.a2, this.r2, this.a3, this.r3, this.a4, 
+            this.af, this.a1, this.r1, this.firstDiff, this.mixer, this.an,
+            this.rnp, this.a2, this.r2, this.r1, this.firstDiff, this.mixer,
+            this.an, this.rnp, this.a2, this.r2, this.a3, this.r3, this.a4,
             this.r4, this.a5, this.r5, this.a6, this.r6, this.ab, this.outputMixer
         ];
     }
