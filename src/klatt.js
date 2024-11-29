@@ -235,7 +235,7 @@ class Monophthong extends Vocoid {
     }
 }
 
-class Sonorant extends Vocoid {
+class Approximant extends Vocoid {
     constructor(formantFreqs, bandwidths) {
         super(formantFreqs, bandwidths, 110, 62);
     }
@@ -1421,10 +1421,10 @@ const PHONES = {
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
 
-    "l": new Sonorant([310, 1050, 2880], [50, 100, 280]),
-    "r": new Sonorant([310, 1060, 1380], [70, 100, 120]),
-    "w": new Sonorant([290, 610, 2150], [50, 80, 60]),
-    "j": new Sonorant([260, 2070, 3020], [40, 250, 500]),
+    "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
+    "ɹ": new Approximant([310, 1060, 1380], [70, 100, 120]),
+    "w": new Approximant([290, 610, 2150], [50, 80, 60]),
+    "j": new Approximant([260, 2070, 3020], [40, 250, 500]),
 
     //Nasals
     "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
