@@ -193,7 +193,7 @@ class Fricative {
 }
 
 class Vocoid {
-    constructor(formantFreqs, bandwidths) {
+    constructor(formantFreqs, bandwidths, duration, AV) {
         if (formantFreqs.length !== bandwidths.length) {
             throw new Error("Number of frequencies and number of bandwidths must be the same" +
                 `(${formantFreqs.length} !== ${bandwidths.length})`)
@@ -201,9 +201,11 @@ class Vocoid {
 
         this.formantFreqs = formantFreqs;
         this.bandwidths = bandwidths;
+        this.duration = duration;
+        this.AV = AV;
     }
 
-    makeParams(amplitude, duration = 500) {
+    makeParams() {
         let params = new KlattParam();
         const N = params.N_SAMP;
         let FF = params.FF;
@@ -213,9 +215,9 @@ class Vocoid {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        params.setMetadata(true, duration / 1000);
+        params.setMetadata(true, this.duration / 1000);
 
-        params.AV.fill(amplitude);
+        params.AV.fill(this.AV);
         params.F0 = linearSequence(120, 70, N);
 
         for (let i = 0; i < this.formantFreqs.length; i++) {
@@ -229,22 +231,13 @@ class Vocoid {
 
 class Monophthong extends Vocoid {
     constructor(formantFreqs, bandwidths) {
-        super(formantFreqs, bandwidths);
-    }
-
-    makeParams() {
-        return super.makeParams(60);
+        super(formantFreqs, bandwidths, 500, 60);
     }
 }
 
 class Sonorant extends Vocoid {
-    constructor(formantFreqs, bandwidths, duration = 150) {
-        super(formantFreqs, bandwidths);
-        this.duration = duration;
-    }
-
-    makeParams() {
-        return super.makeParams(55, this.duration);
+    constructor(formantFreqs, bandwidths) {
+        super(formantFreqs, bandwidths, 110, 62);
     }
 }
 
