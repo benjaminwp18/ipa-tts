@@ -53,7 +53,7 @@ class Nasal {
 
     makeParams() {
         let params = new KlattParam();
-        params.setMetadata(true, this.duration_ms / 1000);
+        params.setMetadata(true, this.duration_ms * durationMultiplier / 1000);
 
         const N = params.N_SAMP;
         let FF = params.FF;
@@ -168,7 +168,7 @@ class Fricative {
     makeParams() {
         let params = new KlattParam();
 
-        params.setMetadata(true, this.duration_ms / 1000);
+        params.setMetadata(true, this.duration_ms * durationMultiplier / 1000);
 
         const N = params.N_SAMP;
 
@@ -217,7 +217,7 @@ class Vocoid {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        params.setMetadata(true, this.duration / 1000);
+        params.setMetadata(true, this.duration * durationMultiplier / 1000);
 
         params.AV.fill(this.AV);
         params.F0 = linearSequence(120, 70, N);
@@ -256,7 +256,7 @@ class Stop {
         fricative.AH = piecewiseLinearSequence([0, fricative.AH[0], fricative.AH[0], 0], fricative.AH.length);
 
         const closure = fricative.clone();
-        closure.setMetadata(true, this.closureMs / 1000);
+        closure.setMetadata(true, this.closureMs * durationMultiplier / 1000);
         closure.AV.fill(0);
         closure.AF.fill(0);
         closure.AH.fill(0);
@@ -1533,7 +1533,7 @@ SPACE.AH.fill(0);
 SPACE.AB.fill(0);
 
 export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplierInput) {
-    console.log("pitch multiplier: ", pitchMultiplierInput);
+    console.log("duration multiplier: ", durationMultiplierInput);
     pitchMultiplier = pitchMultiplierInput;
     durationMultiplier = durationMultiplierInput;
     let params = null;
