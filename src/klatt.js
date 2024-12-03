@@ -192,8 +192,8 @@ class Fricative {
     }
 }
 
-class Monophthong {
-    constructor(formantFreqs, bandwidths) {
+class Vocoid {
+    constructor(formantFreqs, bandwidths, duration, AV) {
         if (formantFreqs.length !== bandwidths.length) {
             throw new Error("Number of frequencies and number of bandwidths must be the same" +
                 `(${formantFreqs.length} !== ${bandwidths.length})`)
@@ -201,6 +201,8 @@ class Monophthong {
 
         this.formantFreqs = formantFreqs;
         this.bandwidths = bandwidths;
+        this.duration = duration;
+        this.AV = AV;
     }
 
     makeParams() {
@@ -213,7 +215,9 @@ class Monophthong {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        params.AV.fill(60);
+        params.setMetadata(true, this.duration / 1000);
+
+        params.AV.fill(this.AV);
         params.F0 = linearSequence(120, 70, N);
 
         for (let i = 0; i < this.formantFreqs.length; i++) {
@@ -259,6 +263,18 @@ class Stop {
         closure.rampTo(fricative, 0.005);
 
         return closure;
+    }
+}
+
+class Monophthong extends Vocoid {
+    constructor(formantFreqs, bandwidths) {
+        super(formantFreqs, bandwidths, 500, 60);
+    }
+}
+
+class Approximant extends Vocoid {
+    constructor(formantFreqs, bandwidths) {
+        super(formantFreqs, bandwidths, 110, 62);
     }
 }
 
@@ -1405,20 +1421,20 @@ const PHONES = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
     "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
-    "ɛ": new Monophthong([620, 1660, 2430], [70, 130, 300]),
+    "ɛ": new Monophthong([530, 1680, 2500], [60, 90, 200]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
     "ɑ": new Monophthong([700, 1220, 2600], [130, 70, 160]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
     "ʌ": new Monophthong([700, 1220, 2570], [70, 50, 140]),
-    "a": new Monophthong([700, 1560, 2430], [70, 130, 320]),
+    "a": new Monophthong([650, 1210, 2550], [90, 70, 160]),
     "ɒ": new Monophthong([620, 850, 2570], [70, 50, 140]),
     "ə": new Monophthong([460, 1400, 2570], [90, 110, 80]),
-    "y": new Monophthong([310, 1700, 2400], [50, 100, 200]),
+    "y": new Monophthong([270, 2050, 2400], [40, 100, 200]),
     "ɨ": new Monophthong([320, 1700, 2300], [60, 120, 300]),
     "ʉ": new Monophthong([320, 1600, 2400], [50, 100, 250]),
     "ɯ": new Monophthong([320, 1300, 2200], [60, 110, 180]),
     "u": new Monophthong([300, 870, 2240], [50, 90, 180]),
-    "ʏ": new Monophthong([360, 1900, 2500], [70, 120, 200]),
+    "ʏ": new Monophthong([310, 1690, 2340], [40, 80, 130]),
     "e": new Monophthong([500, 1800, 2600], [60, 110, 300]),
     "ø": new Monophthong([450, 1600, 2400], [60, 100, 200]),
     "ɘ": new Monophthong([470, 1400, 2400], [70, 130, 210]),
@@ -1431,16 +1447,20 @@ const PHONES = {
     "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
     "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
-    "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
-    "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
-    "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
-    "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]), // changed AV from 60
 
-    // TODO: not sure how to fix these
+    "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
+    "z": new Fricative().setAF(45).setAV(40).setAmp(6, 52),
+    "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
+    "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
     "f": new Fricative().setAF(60).setAV(0).setAB(57),
-    "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
+    "v": new Fricative().setAF(50).setAV(50).setAB(57),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
-    "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
+    "ð": new Fricative().setAF(55).setAV(35).setAmp(6, 27).setAB(48),
+
+    "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
+    "ɹ": new Approximant([310, 1060, 1380], [70, 100, 120]),
+    "w": new Approximant([290, 610, 2150], [50, 80, 60]),
+    "j": new Approximant([260, 2070, 3020], [40, 250, 500]),
 
     // TODO: match BW & FF to neighboring vowels
     "h": new Fricative().setAF(0).setAV(0).setAH(105),
