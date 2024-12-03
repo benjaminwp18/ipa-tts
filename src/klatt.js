@@ -192,8 +192,8 @@ class Fricative {
     }
 }
 
-class Monophthong {
-    constructor(formantFreqs, bandwidths) {
+class Vocoid {
+    constructor(formantFreqs, bandwidths, duration, AV) {
         if (formantFreqs.length !== bandwidths.length) {
             throw new Error("Number of frequencies and number of bandwidths must be the same" +
                 `(${formantFreqs.length} !== ${bandwidths.length})`)
@@ -201,6 +201,8 @@ class Monophthong {
 
         this.formantFreqs = formantFreqs;
         this.bandwidths = bandwidths;
+        this.duration = duration;
+        this.AV = AV;
     }
 
     makeParams() {
@@ -213,7 +215,9 @@ class Monophthong {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        params.AV.fill(60);
+        params.setMetadata(true, this.duration / 1000);
+
+        params.AV.fill(this.AV);
         params.F0 = linearSequence(120, 70, N);
 
         for (let i = 0; i < this.formantFreqs.length; i++) {
@@ -222,6 +226,18 @@ class Monophthong {
         }
 
         return params;
+    }
+}
+
+class Monophthong extends Vocoid {
+    constructor(formantFreqs, bandwidths) {
+        super(formantFreqs, bandwidths, 500, 60);
+    }
+}
+
+class Approximant extends Vocoid {
+    constructor(formantFreqs, bandwidths) {
+        super(formantFreqs, bandwidths, 110, 62);
     }
 }
 
@@ -1403,6 +1419,11 @@ const PHONES = {
     "v": new Fricative().setAF(50).setAV(50).setAB(57),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(55).setAV(35).setAmp(6, 27).setAB(48),
+
+    "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
+    "ɹ": new Approximant([310, 1060, 1380], [70, 100, 120]),
+    "w": new Approximant([290, 610, 2150], [50, 80, 60]),
+    "j": new Approximant([260, 2070, 3020], [40, 250, 500]),
 
     //Nasals
     "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
