@@ -285,7 +285,7 @@ class Approximant extends Vocoid {
  * @param {Array} samples float array of samples
  * @param {number} sampleRate integer sample rate, should be 10000 for Klatt
  */
-async function playSamples(ctx, samples, sampleRate) {
+function playSamples(ctx, samples, sampleRate) {
     // Convert samples to audio context buffer
     const buffer = ctx.createBuffer(1, samples.length, sampleRate);
     // TODO: Use something more like this:
@@ -380,6 +380,10 @@ function linearRamp(arrayA, arrayB, n) {
  * @returns {number[]} a piecewise sequence of linear subsequences
  */
 function piecewiseLinearSequence(targets, n) {
+    if (targets.length === 1) {
+        targets.push(targets[0]);
+    }
+
     const numSubsequences = targets.length - 1;
 
     if (!Number.isInteger(n) || n < 2 * numSubsequences) {
@@ -745,10 +749,10 @@ class KlattSynth {
     /**
      * Play the output of this synth.
      */
-    async play(ctx) {
+    play(ctx) {
         console.log("Final output: ", this.output);
 
-        await playSamples(ctx, this.output, 10000);
+        playSamples(ctx, this.output, 10000);
     }
 }
 
@@ -1506,9 +1510,42 @@ const PHONES = {
     ),
 };
 
-export async function playWord(ctx, word) {
+const TONES = {
+    "˥": 120,
+    "˦": 105,
+    "˧": 90,
+    "˨": 75,
+    "˩": 60,
+};
+
+const SPACE = new KlattParam();
+SPACE.setMetadata(true, 0.1);
+SPACE.AF.fill(0);
+SPACE.AV.fill(0);
+SPACE.AH.fill(0);
+SPACE.AB.fill(0);
+
+export function playPhrase(ctx, phrase) {
+    let params = null;
+    for (const word of phrase.split(" ")) {
+        const wordParams = getWordParams(word);
+        if (params == null) {
+            params = wordParams;
+        }
+        else {
+            params.append(SPACE).append(wordParams);
+        }
+    }
+
+    const synth = klattMake(params);
+    synth.run();
+    synth.play(ctx);
+}
+
+function getWordParams(word) {
     let params = null;
     let lastPhoneParams = null;
+    let toneList = [];
 
     for (let i = 0; i < word.length; i++) {
         let grapheme = word[i];
@@ -1545,6 +1582,9 @@ export async function playWord(ctx, word) {
                 params.rampTo(lastPhoneParams, 0.02);
             }
         }
+        else if (TONES[grapheme] !== undefined) {
+            toneList.push(TONES[grapheme]);
+        }
     }
 
     if (params === null) {
@@ -1560,10 +1600,14 @@ export async function playWord(ctx, word) {
 
     params.rampTo(tailStub, 0.05);
 
-    // Consistant F0 fall across whole word
-    params.F0 = linearSequence(120, 70, params.N_SAMP);
+    if (toneList.length === 0) {
+        // Consistant F0 fall across whole word
+        params.F0 = linearSequence(120, 70, params.N_SAMP);
+    }
+    else {
+        console.warn(toneList);
+        params.F0 = piecewiseLinearSequence(toneList, params.N_SAMP);
+    }
 
-    const synth = klattMake(params);
-    synth.run();
-    await synth.play(ctx);
+    return params;
 }

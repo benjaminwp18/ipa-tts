@@ -23,6 +23,6 @@ export function main() {
 	soundButton.addEventListener("click", function (e) {
 		e.preventDefault();
 		spectrogram.start();
-		Klatt.playWord(ctx, ipaTextField.value);
+		Klatt.playPhrase(ctx, ipaTextField.value);
 	});
 }
