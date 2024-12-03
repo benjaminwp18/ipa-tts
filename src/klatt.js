@@ -225,6 +225,43 @@ class Monophthong {
     }
 }
 
+class Stop {
+    constructor(fricative, closureMs, aspirationMs) {
+        // Burst length defined by fricative length
+        this.fricative = fricative;
+        this.closureMs = closureMs;
+        this.aspirationMs = aspirationMs;
+    }
+
+    // setCVTransition(cvTransition) {
+    //     this.cvTransition = cvTransition;
+    // }
+
+    // setVCTransition(vcTransition) {
+    //     this.vcTransition = vcTransition;
+    // }
+
+    // setVOT(vot) {
+    //     this.vot = vot;
+    // }
+
+    makeParams() {
+        const fricative = this.fricative.makeParams();
+        fricative.AH = piecewiseLinearSequence([0, fricative.AH[0], fricative.AH[0], 0], fricative.AH.length);
+
+        const closure = fricative.clone();
+        closure.setMetadata(true, this.closureMs / 1000);
+        closure.AV.fill(0);
+        closure.AF.fill(0);
+        closure.AH.fill(0);
+        closure.AB.fill(0);
+
+        closure.rampTo(fricative, 0.005);
+
+        return closure;
+    }
+}
+
 /***** HELPERS *****/
 
 /**
@@ -424,7 +461,7 @@ function klattMake(params = new KlattParam()) {
 function extendOrTruncate(array, newLength) {
     const oldLength = array.length;
 
-    // if new_length <= old_length then we truncate and return
+    // if new_length <= old_length then we truncate
     array.length = newLength;
 
     // else must extend by duplicating last element
@@ -1398,22 +1435,55 @@ const PHONES = {
     "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
     "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]), // changed AV from 60
-    
+
     // TODO: not sure how to fix these
     "f": new Fricative().setAF(60).setAV(0).setAB(57),
     "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
 
-    //Nasals
+    // TODO: match BW & FF to neighboring vowels
+    "h": new Fricative().setAF(0).setAV(0).setAH(105),
+
+    // Nasals
     "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
     "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140], [450, 1300]),
     "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160], [400, 1300]),
-    //TODO: N sounds needs work
+    // TODO: N sounds needs work
     "n": new Nasal([300, 1600, 2400], [50, 70, 140], [750, 1750]),
     "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150], [650, 1650]),
-    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170], [850, 1850]), 
-    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140], [650, 1550]), 
+    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170], [850, 1850]),
+    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140], [650, 1550]),
+
+    // Stops
+    // TODO: blended aspiration with following vowels
+    // AH is set on the burst fric here, not treated seperately (aspirationMs param ignored)
+    // TODO: different params based for prevocalic/postvocalic positions (current values are all prevocalic)
+    // TODO: V-S transition (ramp fr previous sound to closure)?
+    "t": new Stop(
+        new Fricative(40).setAF(53).setAV(0).setAH(58).setAmps([3, 4, 5, 6], [30, 45, 57, 63]),
+        85, 90
+    ),
+    "d": new Stop(
+        new Fricative(15).setAF(53).setAV(47).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
+        10, 90
+    ),
+    "p": new Stop(
+        new Fricative(20).setAF(63).setAV(0).setAH(65).setAB(63),
+        120, 90
+    ),
+    "b": new Stop(
+        new Fricative(10).setAF(63).setAV(47).setAH(0).setAB(63),
+        10, 90
+    ),
+    "k": new Stop(
+        new Fricative(65).setAF(49).setAV(0).setAH(58).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
+        120, 100
+    ),
+    "g": new Stop(
+        new Fricative(25).setAF(53).setAV(47).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
+        10, 90
+    ),
 };
 
 export async function playWord(ctx, word) {
@@ -1443,8 +1513,8 @@ export async function playWord(ctx, word) {
                 //  just shorter & w/amplitudes of 0
                 params = lastPhoneParams.clone();
                 params.setMetadata(true, 0.01);
-                params.AV = new Array(params.N_SAMP).fill(0);
-                params.AF = new Array(params.N_SAMP).fill(0);
+                params.AV.fill(0);
+                params.AF.fill(0);
 
                 // Ramp from stub to real params
                 // Creates fade in effect w/o changing phone quality
