@@ -1,5 +1,7 @@
 let ctx = null;
 let audio_dst;
+let pitchMultiplier;
+let durationMultiplier;
 
 /**
  * Must be called before trying to use any other functions in this module.
@@ -1510,13 +1512,18 @@ const PHONES = {
     ),
 };
 
-const TONES = {
+const BASE_TONES = {
     "˥": 120,
     "˦": 105,
     "˧": 90,
     "˨": 75,
     "˩": 60,
 };
+
+
+function getTonePitch(grapheme) {
+    return BASE_TONES[grapheme] * pitchMultiplier;
+}
 
 const SPACE = new KlattParam();
 SPACE.setMetadata(true, 0.1);
@@ -1525,7 +1532,10 @@ SPACE.AV.fill(0);
 SPACE.AH.fill(0);
 SPACE.AB.fill(0);
 
-export function playPhrase(ctx, phrase) {
+export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplierInput) {
+    console.log("pitch multiplier: ", pitchMultiplierInput);
+    pitchMultiplier = pitchMultiplierInput;
+    durationMultiplier = durationMultiplierInput;
     let params = null;
     for (const word of phrase.split(" ")) {
         const wordParams = getWordParams(word);
@@ -1582,8 +1592,8 @@ function getWordParams(word) {
                 params.rampTo(lastPhoneParams, 0.02);
             }
         }
-        else if (TONES[grapheme] !== undefined) {
-            toneList.push(TONES[grapheme]);
+        else if (BASE_TONES[grapheme] !== undefined) {
+            toneList.push(getTonePitch(grapheme));
         }
     }
 
@@ -1602,7 +1612,7 @@ function getWordParams(word) {
 
     if (toneList.length === 0) {
         // Consistant F0 fall across whole word
-        params.F0 = linearSequence(120, 70, params.N_SAMP);
+        params.F0 = linearSequence(120 * pitchMultiplier, 70 * pitchMultiplier, params.N_SAMP);
     }
     else {
         console.warn(toneList);
