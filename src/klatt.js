@@ -1394,16 +1394,15 @@ const PHONES = {
     "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
     "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
+
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
-    "z": new Fricative().setAF(60).setAV(47).setAmp(6, 52), // changed AV from 60
+    "z": new Fricative().setAF(45).setAV(40).setAmp(6, 52),
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
-    "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]), // changed AV from 60
-    
-    // TODO: not sure how to fix these
+    "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
     "f": new Fricative().setAF(60).setAV(0).setAB(57),
-    "v": new Fricative().setAF(60).setAV(40).setAB(57), // AF=50, AV=47 according to Klatt?
+    "v": new Fricative().setAF(50).setAV(50).setAB(57),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
-    "ð": new Fricative().setAF(50).setAV(20).setAmp(6, 27).setAB(48), // AV=47
+    "ð": new Fricative().setAF(55).setAV(35).setAmp(6, 27).setAB(48),
 
     //Nasals
     "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
