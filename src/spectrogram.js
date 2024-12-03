@@ -15,7 +15,7 @@ export class Spectrogram {
         let canvas = this.canvas;
         const canvasCtx = this.canvas.getContext("2d");
 
-        canvasCtx.fillStyle = "white";
+        canvasCtx.fillStyle = "#f5f5f5";
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
     
         const spectrogramDuration = 5000;  // milliseconds
@@ -70,11 +70,8 @@ export class Spectrogram {
             let lastBinY = chartHeight;
             for(let i = 0; i < displayedBinCount; i++) {
                 let intensity = Math.max(Math.min(255 + fftArray[i] * 3, 255), 0);
-                canvasCtx.fillStyle = `rgb(
-                    ${255 - intensity}
-                    255
-                    ${255 - intensity})`;
-                
+                canvasCtx.fillStyle = `rgb(${255 - intensity}, 255, ${255 - intensity})`;
+
                 let binY = Math.floor(chartHeight - binHeight * (i + 1));
                 canvasCtx.fillRect(spectrogramLastX, binY, spectrogramCurrentX - spectrogramLastX, lastBinY - binY);
                 lastBinY = binY;

@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <title>[ˈsinjɚ ˈpɹɑʤɛkt]</title>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="styles.css">
         <link rel="stylesheet" type="text/css" href="keyboard-style.css">
         <script type="module">
@@ -17,7 +18,7 @@
         </script>
     </head>
 
-    <body>
+    <body class="p-3">
         <div id="overlay">
             <div id="overlay-text">
                 <img src="imgs/ipa-banner-1.png">
@@ -26,447 +27,295 @@
                 <img src="imgs/ipa-banner-2.png">
             </div>
         </div>
-        <div class="container">
-            <form id="ipa-lookup-form">
-                <div class="ipa-lookup-container">
-                    <div>
-                        <label for="language-lookup"> IPA Dictionary Lookup</label>
-                    </div>
-                    <div>
-                        <select name="select-language" id="language-selection">
-                        <option value="default">Select Language</option>
-                        </select>
-                    </div>
-                    <div>
-                        <input placeholder="Enter text" id="text"/>
-                        <button type="submit" id="search-button" style="background-color: rgb(13, 110, 253); color: white;">Search</button>
-                    </div>
-                    <label>Result:</label>
-                    <div>
-                        <input placeholder="Output IPA" id="ipa-text-output"/>
-                    </div>
-                    <div id="language-selection-warning" style="color: red"></div>
-                </div>
-            </form>
-            <br>
-            <!-- Flex container for IPA input and sliders -->
-            <form id="ipa-input">
-                <div class="ipa-sliders">
-                    <div class="ipa-input">
-                        <label for="ipa-to-sound">IPA to Sound</label>
-                        <input placeholder="Enter IPA" id="ipa-text-input">
-                    </div>
-                    <div>
-                        <div>
-                            <label for="speed-slider">Playback Speed</label>
-                        </div>
-                        <div>
-                            <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
-                        </div>
-                        <div>
-                            <label for="pitch-slider">Pitch</label>
-                        </div>
-                        <div>
-                            <input type="range" min="1" max="100" value="50" class="slider" id="pitchRange">
-                        </div>
-                    </div>
-                    <div>
-                        <button type="submit" id="make-sound-button" style="background-color: rgb(13, 110, 253); color: white;">Make Sound</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div id="keyboard-area">
-
-            <!-- Tab links -->
-            <div class="tab">
-                <button id="button-v" class="tablinks" onclick="openTab(event, 'V')">Vowels</button>
-                <button id="button-c1" class="tablinks" onclick="openTab(event, 'C1')">Consonants 1</button>
-                <button id="button-c2" class="tablinks" onclick="openTab(event, 'C2')">Consonants 2</button>
-                <button id="button-misc" class="tablinks" onclick="openTab(event, 'misc')">Misc.</button>
-                <button id="button-info" class="tablinks" onclick="openTab(event, 'keyboard-info')">Info</button>
+        <form id="ipa-lookup-form" class="squircle container-sm mb-4">
+            <h2 class="mb-3">IPA Dictionary Lookup</h1>
+            <select class="form-select mb-3" name="select-language" id="language-selection">
+                <option value="default">Select Language</option>
+            </select>
+            <input class="form-control mb-3" autocomplete="off" placeholder="Enter text" id="text"/>
+            <button class="btn btn-primary mb-3" type="submit" id="search-button">Search</button>
+            <input class="form-control" readonly placeholder="Output IPA" id="ipa-text-output"/>
+            <div id="language-selection-warning" style="color: red"></div>
+        </form>
+        <form id="ipa-input" class="squircle container-sm mb-4">
+            <h2 class="mb-3">IPA to Sound</h2>
+            <input class="form-control mb-3" autocomplete="off" placeholder="Enter IPA" id="ipa-text-input">
+            <div class="mb-3">
+                <label class="form-label" for="speed-slider">Playback Speed</label>
+                <input class="form-range" type="range" min="1" max="100" value="50" class="slider" id="speedRange">
             </div>
+            <div class="mb-3">
+                <label class="form-label" for="pitch-slider">Pitch</label>
+                <input class="form-range" type="range" min="1" max="100" value="50" class="slider" id="pitchRange">
+            </div>
+            <button class="btn btn-primary" type="submit" id="make-sound-button">Make Sound</button>
+        </form>
+        <div id="keyboard-area" class="squircle container-lg mb-4">
+            <!-- Tab links -->
+            <ul class="nav nav-pills mb-3">
+                <li class="nav-item">
+                    <button id="button-v" class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-v">Vowels</button>
+                </li>
+                <li class="nav-item">
+                    <button id="button-c1" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-c1">Consonants 1</button>
+                </li>
+                <li class="nav-item">
+                    <button id="button-c2" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-c2">Consonants 2</button>
+                </li>
+                <li class="nav-item">
+                    <button id="button-misc" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-misc">Misc.</button>
+                </li>
+                <li class="nav-item">
+                    <button id="button-info" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-info">Info</button>
+                </li>
+            </ul>
 
             <!-- Tab content -->
-            <div id="V" class="tabcontent open">
-                <table class="key-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th colspan="1"></th>
-                            <th colspan="1">Front</th>
-                            <th colspan="2"></th>
-                            <th colspan="4">Central</th>
-                            <th colspan="2"></th>
-                            <th colspan="2">Back</th>
-                            <th></th>
-                            <th colspan="2">
-                                Diacritics
-                                <button class="info-button" onclick="openPopup()">ℹ️</button>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Close</td>
-                            <td></td>
-                            <td><button class="key">i</button></td>
-                            <td><button class="key">y</button></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɨ</button></td>
-                            <td><button class="key">ʉ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɯ</button></td>
-                            <td><button class="key">u</button></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x0303</button></td>
-                            <td><button class="key bluekey diacritic">&#x02DE</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɪ</button></td>
-                            <td><button class="key">ʏ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ʊ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x032F</button></td>
-                            <td><button class="key bluekey diacritic">&#x02D0</button></td>
-                        </tr>
-                        <tr>
-                            <td>Close-Mid</td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">e</button></td>
-                            <td><button class="key">ø</button></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɘ</button></td>
-                            <td><button class="key">ɵ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɤ</button></td>
-                            <td><button class="key">o</button></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x0339</button></td>
-                            <td><button class="key bluekey diacritic">&#x031C</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ə</button></td>
-                            <td><button class="key">ɚ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x031F</button></td>
-                            <td><button class="key bluekey diacritic">&#x0320</button></td>
-                        </tr>
-                        <tr>
-                            <td>Open-Mid</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɛ</button></td>
-                            <td><button class="key">œ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɜ</button></td>
-                            <td><button class="key">ɝ</button></td>
-                            <td><button class="key">ɞ</button></td>
-                            <td><button class="key">ʌ</button></td>
-                            <td><button class="key">ɔ</button></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x0308</button></td>
-                            <td><button class="key bluekey diacritic">&#x033D</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">æ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɐ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x031D</button></td>
-                            <td><button class="key bluekey diacritic">&#x031E</button></td>
-                        </tr>
-                        <tr>
-                            <td>Open</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">a</button></td>
-                            <td><button class="key">ɶ</button></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">ɑ</button></td>
-                            <td><button class="key">ɒ</button></td>
-                            <td></td>
-                            <td><button class="key bluekey diacritic">&#x0318</button></td>
-                            <td><button class="key bluekey diacritic">&#x0319</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <!-- The Pop-up Container -->
-                <div id="popup" class="popup">
-                    <div class="popup-content">
-                        <span class="close" onclick="closePopup()">&times;</span>
-                        <p>To type a character with a diacritic, simply press the button for the character, then press the button for the diacritic mark. For example, to type <span class="diacritic">ȧ</span>, press the <span class="diacritic">a</span> button, then press the <span class="diacritic">overdot</span> button.</p>
+            <div class="tab-content p-2">
+                <div id="pane-v" class="tab-pane active" role="tabpanel">
+                    <table class="key-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th colspan="1"></th>
+                                <th colspan="1">Front</th>
+                                <th colspan="2"></th>
+                                <th colspan="4">Central</th>
+                                <th colspan="2"></th>
+                                <th colspan="2">Back</th>
+                                <th></th>
+                                <th colspan="2">
+                                    Diacritics
+                                    <button class="info-button" onclick="openPopup()">ℹ️</button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Close</td>
+                                <td></td>
+                                <td><button class="key">i</button></td>
+                                <td><button class="key">y</button></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɨ</button></td>
+                                <td><button class="key">ʉ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɯ</button></td>
+                                <td><button class="key">u</button></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x0303</button></td>
+                                <td><button class="key bluekey diacritic">&#x02DE</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɪ</button></td>
+                                <td><button class="key">ʏ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ʊ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x032F</button></td>
+                                <td><button class="key bluekey diacritic">&#x02D0</button></td>
+                            </tr>
+                            <tr>
+                                <td>Close-Mid</td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">e</button></td>
+                                <td><button class="key">ø</button></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɘ</button></td>
+                                <td><button class="key">ɵ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɤ</button></td>
+                                <td><button class="key">o</button></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x0339</button></td>
+                                <td><button class="key bluekey diacritic">&#x031C</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ə</button></td>
+                                <td><button class="key">ɚ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x031F</button></td>
+                                <td><button class="key bluekey diacritic">&#x0320</button></td>
+                            </tr>
+                            <tr>
+                                <td>Open-Mid</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɛ</button></td>
+                                <td><button class="key">œ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɜ</button></td>
+                                <td><button class="key">ɝ</button></td>
+                                <td><button class="key">ɞ</button></td>
+                                <td><button class="key">ʌ</button></td>
+                                <td><button class="key">ɔ</button></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x0308</button></td>
+                                <td><button class="key bluekey diacritic">&#x033D</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">æ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɐ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x031D</button></td>
+                                <td><button class="key bluekey diacritic">&#x031E</button></td>
+                            </tr>
+                            <tr>
+                                <td>Open</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">a</button></td>
+                                <td><button class="key">ɶ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ɑ</button></td>
+                                <td><button class="key">ɒ</button></td>
+                                <td></td>
+                                <td><button class="key bluekey diacritic">&#x0318</button></td>
+                                <td><button class="key bluekey diacritic">&#x0319</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- The Pop-up Container -->
+                    <div id="popup" class="popup">
+                        <div class="popup-content">
+                            <span class="close" onclick="closePopup()">&times;</span>
+                            <p>To type a character with a diacritic, simply press the button for the character, then press the button for the diacritic mark. For example, to type <span class="diacritic">ȧ</span>, press the <span class="diacritic">a</span> button, then press the <span class="diacritic">overdot</span> button.</p>
+                        </div>
                     </div>
+                    <!-- Overlay for pop-up -->
+                    <div class="popup-overlay"></div>
                 </div>
-                <!-- Overlay for pop-up -->
-                <div class="popup-overlay"></div>
-            </div>
 
-			<div id="C1" class="tabcontent">
-				<table class="key-table"><thead>
-				<tr>
-					<th></th>
-					<th colspan="2">Bilabial</th>
-					<th colspan="2">Labiodental</th>
-					<th colspan="2">Dental</th>
-					<th colspan="2">Alveolar</th>
-					<th colspan="2">Postalveolar</th>
-					<th colspan="2">Extra</th>
-				</tr></thead>
-					<tbody>
-					<tr>
-						<td>Plosive</td>
-						<td><button class="key">p</button></td>
-						<td><button class="key">b</button></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">t</button></td>
-						<td><button class="key">d</button></td>
-						<td></td>
-						<td></td>
-						<td><button class="key bluekey">ɥ</button></td>
-						<td><button class="key bluekey">ʍ</button></td>
-					</tr>
-					<tr>
-						<td>Nasal</td>
-						<td></td>
-						<td><button class="key">m</button></td>
-						<td></td>
-						<td><button class="key">ɱ</button></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">n</button></td>
-						<td><button class="key bluekey">ɓ</button></td>
-						<td><button class="key bluekey">ɗ</button></td>
-					</tr>
-					<tr>
-						<td>Trill</td>
-						<td></td>
-						<td><button class="key">ʙ</button></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">r</button></td>
-						<td></td>
-						<td></td>
-						<td><button class="key bluekey">ɕ</button></td>
-						<td><button class="key bluekey">ʑ</button></td>
-					</tr>
-					<tr>
-						<td>Tap/Flap</td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">ⱱ</button></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">ɾ</button></td>
-						<td></td>
-						<td></td>
-						<td><button class="key bluekey">ɺ</button></td>
-						<td><button class="key bluekey">ɫ</button></td>
-					</tr>
-					<tr>
-						<td>Fricative</td>
-						<td><button class="key">ɸ</button></td>
-						<td><button class="key">β</button></td>
-						<td><button class="key">f</button></td>
-						<td><button class="key">v</button></td>
-						<td><button class="key">θ</button></td>
-						<td><button class="key">ð</button></td>
-						<td><button class="key">s</button></td>
-						<td><button class="key">z</button></td>
-						<td><button class="key">ʃ</button></td>
-						<td><button class="key">ʒ</button></td>
-						<td><button class="key bluekey">ʧ</button></td>
-						<td><button class="key bluekey">ʤ</button></td>
-					</tr>
-					<tr>
-						<td>Lateral Fricative</td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">ɬ</button></td>
-						<td><button class="key">ɮ</button></td>
-						<td></td>
-						<td></td>
-						<td><button class="key bluekey">ʦ</button></td>
-						<td><button class="key bluekey">ʣ</button></td>
-					</tr>
-					<tr>
-						<td>Approximant</td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">ʋ</button></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">ɹ</button></td>
-						<td></td>
-						<td></td>
-						<td><button class="key bluekey">ʨ</button></td>
-						<td><button class="key bluekey">ʥ</button></td>
-					</tr>
-					<tr>
-						<td>Lateral Approximant</td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td><button class="key">l</button></td>
-						<td></td>
-						<td></td>
-						<td><button class="key bluekey">ɫ</button></td>
-						<td></td>
-					</tr>
-					</tbody></table>
-			</div>
-
-            <div id="C2" class="tabcontent">
-                <table class="key-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th colspan="2">Retroflex</th>
-                            <th colspan="2">Palatal</th>
-                            <th colspan="2">Velar</th>
-                            <th colspan="2">Uvular</th>
-                            <th colspan="2">Pharyngeal</th>
-                            <th colspan="2">Glottal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div id="pane-c1" class="tab-pane" role="tabpanel">
+                    <table class="key-table"><thead>
+                    <tr>
+                        <th></th>
+                        <th colspan="2">Bilabial</th>
+                        <th colspan="2">Labiodental</th>
+                        <th colspan="2">Dental</th>
+                        <th colspan="2">Alveolar</th>
+                        <th colspan="2">Postalveolar</th>
+                        <th colspan="2">Extra</th>
+                    </tr></thead>
+                        <tbody>
                         <tr>
                             <td>Plosive</td>
-                            <td><button class="key">ʈ</button></td>
-                            <td><button class="key">ɖ</button></td>
-                            <td><button class="key">c</button></td>
-                            <td><button class="key">ɟ</button></td>
-                            <td><button class="key">k</button></td>
-                            <td><button class="key">g</button></td>
-                            <td><button class="key">q</button></td>
-                            <td><button class="key">ɢ</button></td>
+                            <td><button class="key">p</button></td>
+                            <td><button class="key">b</button></td>
                             <td></td>
                             <td></td>
-                            <td><button class="key">ʔ</button></td>
                             <td></td>
+                            <td></td>
+                            <td><button class="key">t</button></td>
+                            <td><button class="key">d</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key bluekey">ɥ</button></td>
+                            <td><button class="key bluekey">ʍ</button></td>
                         </tr>
                         <tr>
                             <td>Nasal</td>
                             <td></td>
-                            <td><button class="key">ɳ</button></td>
+                            <td><button class="key">m</button></td>
                             <td></td>
-                            <td><button class="key">ɲ</button></td>
-                            <td></td>
-                            <td><button class="key">ŋ</button></td>
-                            <td></td>
-                            <td><button class="key">ɴ</button></td>
+                            <td><button class="key">ɱ</button></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
+                            <td><button class="key">n</button></td>
+                            <td><button class="key bluekey">ɓ</button></td>
+                            <td><button class="key bluekey">ɗ</button></td>
                         </tr>
                         <tr>
                             <td>Trill</td>
                             <td></td>
+                            <td><button class="key">ʙ</button></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td><button class="key">ʀ</button></td>
-                            <td></td>
+                            <td><button class="key">r</button></td>
                             <td></td>
                             <td></td>
+                            <td><button class="key bluekey">ɕ</button></td>
+                            <td><button class="key bluekey">ʑ</button></td>
                         </tr>
                         <tr>
                             <td>Tap/Flap</td>
                             <td></td>
-                            <td><button class="key">ɽ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ⱱ</button></td>
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td><button class="key">ɾ</button></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td><button class="key bluekey">ɺ</button></td>
+                            <td><button class="key bluekey">ɫ</button></td>
                         </tr>
                         <tr>
                             <td>Fricative</td>
-                            <td><button class="key">ʂ</button></td>
-                            <td><button class="key">ʐ</button></td>
-                            <td><button class="key">ç</button></td>
-                            <td><button class="key">ʝ</button></td>
-                            <td><button class="key">x</button></td>
-                            <td><button class="key">ɣ</button></td>
-                            <td><button class="key">χ</button></td>
-                            <td><button class="key">ʁ</button></td>
-                            <td><button class="key">ħ</button></td>
-                            <td><button class="key">ʕ</button></td>
-                            <td><button class="key">h</button></td>
-                            <td><button class="key">ɦ</button></td>
+                            <td><button class="key">ɸ</button></td>
+                            <td><button class="key">β</button></td>
+                            <td><button class="key">f</button></td>
+                            <td><button class="key">v</button></td>
+                            <td><button class="key">θ</button></td>
+                            <td><button class="key">ð</button></td>
+                            <td><button class="key">s</button></td>
+                            <td><button class="key">z</button></td>
+                            <td><button class="key">ʃ</button></td>
+                            <td><button class="key">ʒ</button></td>
+                            <td><button class="key bluekey">ʧ</button></td>
+                            <td><button class="key bluekey">ʤ</button></td>
                         </tr>
                         <tr>
                             <td>Lateral Fricative</td>
@@ -476,173 +325,311 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td><button class="key">ɬ</button></td>
+                            <td><button class="key">ɮ</button></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td><button class="key bluekey">ʦ</button></td>
+                            <td><button class="key bluekey">ʣ</button></td>
                         </tr>
                         <tr>
                             <td>Approximant</td>
                             <td></td>
-                            <td><button class="key">ɻ</button></td>
                             <td></td>
-                            <td><button class="key">j</button></td>
                             <td></td>
-                            <td><button class="key">ɰ</button></td>
+                            <td><button class="key">ʋ</button></td>
                             <td></td>
-                            <th colspan="2">
-                                <span class="extra-label">Extra</span>
-                            </th>
-                            <td><button class="key bluekey">ʄ</button></td>
-                            <td><button class="key bluekey">ɠ</button></td>
-                            <td><button class="key bluekey">ʛ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">ɹ</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key bluekey">ʨ</button></td>
+                            <td><button class="key bluekey">ʥ</button></td>
                         </tr>
                         <tr>
                             <td>Lateral Approximant</td>
                             <td></td>
-                            <td><button class="key">ɭ</button></td>
                             <td></td>
-                            <td><button class="key">ʎ</button></td>
                             <td></td>
-                            <td><button class="key ">ʟ</button></td>
                             <td></td>
-                            <td><button class="key bluekey">ʜ</button></td>
-                            <td><button class="key bluekey">ʡ</button></td>
-                            <td><button class="key bluekey">ʢ</button></td>
-                            <td><button class="key bluekey">ɧ</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-          
-            <div id="misc" class="tabcontent">
-                <table class="key-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th colspan="2">Clicks</th>
-                            <th colspan="2">Suprasegmental</th>
-                            <th colspan="4">Tones and Word Accents</th>
-                            <th colspan="4">Diacritics for C</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
                             <td></td>
-                            <td><button class="key">ǀ</button></td>
-                            <td><button class="key">ǁ</button></td>
-                            <td><button class="key">ˈ</button></td>
-                            <td><button class="key">ˌ</button></td>
-                            <th colspan="2">Level</th>
-                            <th colspan="2">Contour</th>
-                            <td><button class="key diacritic">&#x203F</button></td>
-                            <td><button class="key diacritic">&#x0361</button></td>
-                            <td><button class="key diacritic">&#x0329</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key">l</button></td>
+                            <td></td>
+                            <td></td>
+                            <td><button class="key bluekey">ɫ</button></td>
                             <td></td>
                         </tr>
-                        <tr>
-                            <td></td>
-                            <td><button class="key">ǂ</button></td>
-                            <td><button class="key">ǃ</button></td>
-                            <td><button class="key">ˑ</button></td>
-                            <td><button class="key diacritic">&#x0306</button></td>
-                            <td><button class="key diacritic">&#x030B</button></td>
-                            <td><button class="key">˥</button></td>
-                            <td><button class="key diacritic">&#x0306</button></td>
-                            <td><button class="key">˩‌˥</button></td>
-                            <td><button class="key diacritic">&#x02B7</button></td>
-                            <td><button class="key diacritic">&#x02E0</button></td>
-                            <td><button class="key diacritic">&#x02E2</button></td>
-                            <td><button class="key diacritic">&#x02B2</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td><button class="key">ʘ</button></td>
-                            <td></td>
-                            <td><button class="key">|</button></td>
-                            <td><button class="key">‖</button></td>
-                            <td><button class="key diacritic">&#x0301</button></td>
-                            <td><button class="key">˦</button></td>
-                            <td><button class="key diacritic">&#x0302</button></td>
-                            <td><button class="key">˥‌˩</button></td>
-                            <td><button class="key diacritic">&#x02E0</button></td>
-                            <td><button class="key diacritic">&#x02E4</button></td>
-                            <td><button class="key diacritic">&#x02B0</button></td>
-                            <td><button class="key diacritic">&#x02B1</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">.</button></td>
-                            <td><button class="key diacritic">&#x203F</button></td>
-                            <td><button class="key diacritic">&#x0304</button></td>
-                            <td><button class="key">˧</button></td>
-                            <td><button class="key diacritic">&#7620</button></td>
-                            <td><button class="key">˧‌˥</button></td>
-                            <td><button class="key diacritic">&#x02B4</button></td>
-                            <td><button class="key diacritic">&#x02D2</button></td>
-                            <td><button class="key diacritic">&#x032A</button></td>
-                            <td><button class="key diacritic">&#x033C</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key diacritic">&#x0300</button></td>
-                            <td><button class="key">˨</button></td>
-                            <td><button class="key diacritic">&#7621</button></td>
-                            <td><button class="key">˩‌˧</button></td>
-                            <td><button class="key diacritic">&#x0334</button></td>
-                            <td><button class="key diacritic">&#x033D</button></td>
-                            <td><button class="key diacritic">&#x033A</button></td>
-                            <td><button class="key diacritic">&#x033A</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key diacritic">&#x030F</button></td>
-                            <td><button class="key">˩</button></td>
-                            <td><button class="key diacritic">&#7624</button></td>
-                            <td><button class="key">˧‌˥‌˨</button></td>
-                            <td><button class="key diacritic">&#x032B</button></td>
-                            <td><button class="key diacritic">&#x033E</button></td>
-                            <td><button class="key diacritic">&#x032C</button></td>
-                            <td><button class="key diacritic">&#x030C</button></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><button class="key">↓</button></td>
-                            <td><button class="key">↑</button></td>
-                            <td><button class="key">↗</button></td>
-                            <td><button class="key">↘</button></td>
-                            <td><button class="key diacritic">&#x0335</button></td>
-                            <td><button class="key diacritic">&#x030A</button></td>
-                            <td><button class="key diacritic">&#x0330</button></td>
-                            <td><button class="key diacritic">&#x0334</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
+                        </tbody></table>
+                </div>
 
-            <div id="keyboard-info" class="tabcontent">
-                To type a character with a diacritic, simply press the button for the character then press the button
-                for the diacritic mark. e.g. to type a&#x0307, press the a button then press the overdot button.
+                <div id="pane-c2" class="tab-pane" role="tabpanel">
+                    <table class="key-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th colspan="2">Retroflex</th>
+                                <th colspan="2">Palatal</th>
+                                <th colspan="2">Velar</th>
+                                <th colspan="2">Uvular</th>
+                                <th colspan="2">Pharyngeal</th>
+                                <th colspan="2">Glottal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Plosive</td>
+                                <td><button class="key">ʈ</button></td>
+                                <td><button class="key">ɖ</button></td>
+                                <td><button class="key">c</button></td>
+                                <td><button class="key">ɟ</button></td>
+                                <td><button class="key">k</button></td>
+                                <td><button class="key">g</button></td>
+                                <td><button class="key">q</button></td>
+                                <td><button class="key">ɢ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ʔ</button></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Nasal</td>
+                                <td></td>
+                                <td><button class="key">ɳ</button></td>
+                                <td></td>
+                                <td><button class="key">ɲ</button></td>
+                                <td></td>
+                                <td><button class="key">ŋ</button></td>
+                                <td></td>
+                                <td><button class="key">ɴ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Trill</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">ʀ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Tap/Flap</td>
+                                <td></td>
+                                <td><button class="key">ɽ</button></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Fricative</td>
+                                <td><button class="key">ʂ</button></td>
+                                <td><button class="key">ʐ</button></td>
+                                <td><button class="key">ç</button></td>
+                                <td><button class="key">ʝ</button></td>
+                                <td><button class="key">x</button></td>
+                                <td><button class="key">ɣ</button></td>
+                                <td><button class="key">χ</button></td>
+                                <td><button class="key">ʁ</button></td>
+                                <td><button class="key">ħ</button></td>
+                                <td><button class="key">ʕ</button></td>
+                                <td><button class="key">h</button></td>
+                                <td><button class="key">ɦ</button></td>
+                            </tr>
+                            <tr>
+                                <td>Lateral Fricative</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Approximant</td>
+                                <td></td>
+                                <td><button class="key">ɻ</button></td>
+                                <td></td>
+                                <td><button class="key">j</button></td>
+                                <td></td>
+                                <td><button class="key">ɰ</button></td>
+                                <td></td>
+                                <th colspan="2">
+                                    <span class="extra-label">Extra</span>
+                                </th>
+                                <td><button class="key bluekey">ʄ</button></td>
+                                <td><button class="key bluekey">ɠ</button></td>
+                                <td><button class="key bluekey">ʛ</button></td>
+                            </tr>
+                            <tr>
+                                <td>Lateral Approximant</td>
+                                <td></td>
+                                <td><button class="key">ɭ</button></td>
+                                <td></td>
+                                <td><button class="key">ʎ</button></td>
+                                <td></td>
+                                <td><button class="key ">ʟ</button></td>
+                                <td></td>
+                                <td><button class="key bluekey">ʜ</button></td>
+                                <td><button class="key bluekey">ʡ</button></td>
+                                <td><button class="key bluekey">ʢ</button></td>
+                                <td><button class="key bluekey">ɧ</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="pane-misc" class="tab-pane" role="tabpanel">
+                    <table class="key-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th colspan="2">Clicks</th>
+                                <th colspan="2">Suprasegmental</th>
+                                <th colspan="4">Tones and Word Accents</th>
+                                <th colspan="4">Diacritics for C</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td><button class="key">ǀ</button></td>
+                                <td><button class="key">ǁ</button></td>
+                                <td><button class="key">ˈ</button></td>
+                                <td><button class="key">ˌ</button></td>
+                                <th colspan="2">Level</th>
+                                <th colspan="2">Contour</th>
+                                <td><button class="key diacritic">&#x203F</button></td>
+                                <td><button class="key diacritic">&#x0361</button></td>
+                                <td><button class="key diacritic">&#x0329</button></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><button class="key">ǂ</button></td>
+                                <td><button class="key">ǃ</button></td>
+                                <td><button class="key">ˑ</button></td>
+                                <td><button class="key diacritic">&#x0306</button></td>
+                                <td><button class="key diacritic">&#x030B</button></td>
+                                <td><button class="key">˥</button></td>
+                                <td><button class="key diacritic">&#x0306</button></td>
+                                <td><button class="key">˩‌˥</button></td>
+                                <td><button class="key diacritic">&#x02B7</button></td>
+                                <td><button class="key diacritic">&#x02E0</button></td>
+                                <td><button class="key diacritic">&#x02E2</button></td>
+                                <td><button class="key diacritic">&#x02B2</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><button class="key">ʘ</button></td>
+                                <td></td>
+                                <td><button class="key">|</button></td>
+                                <td><button class="key">‖</button></td>
+                                <td><button class="key diacritic">&#x0301</button></td>
+                                <td><button class="key">˦</button></td>
+                                <td><button class="key diacritic">&#x0302</button></td>
+                                <td><button class="key">˥‌˩</button></td>
+                                <td><button class="key diacritic">&#x02E0</button></td>
+                                <td><button class="key diacritic">&#x02E4</button></td>
+                                <td><button class="key diacritic">&#x02B0</button></td>
+                                <td><button class="key diacritic">&#x02B1</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">.</button></td>
+                                <td><button class="key diacritic">&#x203F</button></td>
+                                <td><button class="key diacritic">&#x0304</button></td>
+                                <td><button class="key">˧</button></td>
+                                <td><button class="key diacritic">&#7620</button></td>
+                                <td><button class="key">˧‌˥</button></td>
+                                <td><button class="key diacritic">&#x02B4</button></td>
+                                <td><button class="key diacritic">&#x02D2</button></td>
+                                <td><button class="key diacritic">&#x032A</button></td>
+                                <td><button class="key diacritic">&#x033C</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key diacritic">&#x0300</button></td>
+                                <td><button class="key">˨</button></td>
+                                <td><button class="key diacritic">&#7621</button></td>
+                                <td><button class="key">˩‌˧</button></td>
+                                <td><button class="key diacritic">&#x0334</button></td>
+                                <td><button class="key diacritic">&#x033D</button></td>
+                                <td><button class="key diacritic">&#x033A</button></td>
+                                <td><button class="key diacritic">&#x033A</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key diacritic">&#x030F</button></td>
+                                <td><button class="key">˩</button></td>
+                                <td><button class="key diacritic">&#7624</button></td>
+                                <td><button class="key">˧‌˥‌˨</button></td>
+                                <td><button class="key diacritic">&#x032B</button></td>
+                                <td><button class="key diacritic">&#x033E</button></td>
+                                <td><button class="key diacritic">&#x032C</button></td>
+                                <td><button class="key diacritic">&#x030C</button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><button class="key">↓</button></td>
+                                <td><button class="key">↑</button></td>
+                                <td><button class="key">↗</button></td>
+                                <td><button class="key">↘</button></td>
+                                <td><button class="key diacritic">&#x0335</button></td>
+                                <td><button class="key diacritic">&#x030A</button></td>
+                                <td><button class="key diacritic">&#x0330</button></td>
+                                <td><button class="key diacritic">&#x0334</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="pane-info" class="tab-pane" role="tabpanel">
+                    To type a character with a diacritic, simply press the button for the character then press the button
+                    for the diacritic mark. e.g. to type a&#x0307, press the a button then press the overdot button.
+                </div>
             </div>
         </div>
-        <canvas id="spectrogram" width="600" height="400"></canvas>
+        <div class="squircle container-lg mb-4">
+            <canvas id="spectrogram" width="900" height="400"></canvas>
+        </div>
         <script src="./keyboard.js"></script>
         <script src="./dict-form.js" type="module"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </body>
 </html>
