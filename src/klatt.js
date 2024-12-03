@@ -1533,7 +1533,6 @@ SPACE.AH.fill(0);
 SPACE.AB.fill(0);
 
 export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplierInput) {
-    console.log("duration multiplier: ", durationMultiplierInput);
     pitchMultiplier = pitchMultiplierInput;
     durationMultiplier = durationMultiplierInput;
     let params = null;
