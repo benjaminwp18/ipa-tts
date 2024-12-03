@@ -27,29 +27,39 @@
                 <img src="imgs/ipa-banner-2.png">
             </div>
         </div>
-        <form id="ipa-lookup-form" class="squircle container-sm mb-4">
-            <h2 class="mb-3">IPA Dictionary Lookup</h1>
-            <select class="form-select mb-3" name="select-language" id="language-selection">
-                <option value="default">Select Language</option>
-            </select>
-            <input class="form-control mb-3" autocomplete="off" placeholder="Enter text" id="text"/>
-            <button class="btn btn-primary mb-3" type="submit" id="search-button">Search</button>
-            <input class="form-control" readonly placeholder="Output IPA" id="ipa-text-output"/>
-            <div id="language-selection-warning" style="color: red"></div>
-        </form>
-        <form id="ipa-input" class="squircle container-sm mb-4">
-            <h2 class="mb-3">IPA to Sound</h2>
-            <input class="form-control mb-3" autocomplete="off" placeholder="Enter IPA" id="ipa-text-input">
-            <div class="mb-3">
-                <label class="form-label" for="speed-slider">Playback Speed</label>
-                <input class="form-range" type="range" min="1" max="100" value="50" class="slider" id="speedRange">
+        <div class="container-lg row row-cols-2 mb-4 mt-4" id="forms-row">
+            <div class="col pe-3">
+                <form id="ipa-lookup-form" class="squircle small-squircle">
+                    <h2 class="mb-3">IPA Dictionary Lookup</h1>
+                    <select class="form-select mb-3" name="select-language" id="language-selection">
+                        <option value="default">Select Language</option>
+                    </select>
+                    <div class="input-group mb-3">
+                        <input class="form-control" autocomplete="off" placeholder="Enter text" id="text"/>
+                        <button class="btn btn-primary" type="submit" id="search-button">Search</button>
+                    </div>
+                    <input class="form-control" readonly placeholder="Output IPA" id="ipa-text-output"/>
+                    <p class="error mt-2 opacity-0" id="language-selection-warning">Success!</p>
+                </form>
             </div>
-            <div class="mb-3">
-                <label class="form-label" for="pitch-slider">Pitch</label>
-                <input class="form-range" type="range" min="1" max="100" value="50" class="slider" id="pitchRange">
+            <div class="col ps-3">
+                <form id="ipa-input" class="squircle small-squircle">
+                    <h2 class="mb-3">IPA to Sound</h2>
+                    <input class="form-control mb-3" autocomplete="off" placeholder="Enter IPA" id="ipa-text-input">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="speed-slider">Playback Speed</label>
+                            <input class="form-range" type="range" min="1" max="100" value="50" class="slider" id="speedRange">
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="pitch-slider">Pitch</label>
+                            <input class="form-range" type="range" min="1" max="100" value="50" class="slider" id="pitchRange">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit" id="make-sound-button">Make Sound</button>
+                </form>
             </div>
-            <button class="btn btn-primary" type="submit" id="make-sound-button">Make Sound</button>
-        </form>
+        </div>
         <div id="keyboard-area" class="squircle container-lg mb-4">
             <!-- Tab links -->
             <ul class="nav nav-pills mb-3">

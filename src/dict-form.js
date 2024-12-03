@@ -55,10 +55,12 @@ for (const [langCode, langName] of Object.entries(sortedLanguages)) {
 }
 
 async function ipaLookupOnSubmit() {
-    warningLabel.innerHTML = "";
+    warningLabel.classList.add("opacity-0");
+    warningLabel.innerHTML = "Success!";
     const langCode = languageSelection.value;
     if (langCode === "default") {
-        warningLabel.innerHTML = "Please select a language";
+        warningLabel.innerHTML = "Please select a language.";
+        warningLabel.classList.remove("opacity-0");
         return;
     }
     const textToTranslate = textInput.value;
@@ -66,15 +68,16 @@ async function ipaLookupOnSubmit() {
     switch (translateResult.status) {
         case "SUCCESS":
             ipaToSoundInput.value = translateResult.ipas.join(" ");
-            break;
+            return;
         case "NOT_FOUND":
-            warningLabel.innerHTML = "No IPA translation available. Please try again";
+            warningLabel.innerHTML = "No IPA translation available. Please try again.";
             break;
         case "NO_VALID_WORD":
-            warningLabel.innerHTML = "Please type a word or phrase to be translated";
+            warningLabel.innerHTML = "Please type a word or phrase to be translated.";
             break;
         case "HTTP_ERROR":
-            warningLabel.innerHTML = "An error has occurred on our end. Please try again later";
+            warningLabel.innerHTML = "An error has occurred on our end. Please try again later.";
             break;
     }
+    warningLabel.classList.remove("opacity-0");
 }
