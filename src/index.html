@@ -27,6 +27,21 @@
                 <img src="imgs/ipa-banner-2.png">
             </div>
         </div>
+        <div class="modal fade" id="diacriticInfoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Diacritic help</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        To type a character with a diacritic, simply press the button for the character, then press the button for the diacritic mark.
+                        For example, to type <kbd>ȧ</kbd>, press the <kbd>a</kbd> button,
+                        then press the <kbd>overdot</kbd> button.
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="container-lg row row-cols-2 mb-4 mt-4" id="forms-row">
             <div class="col pe-3">
                 <form id="ipa-lookup-form" class="squircle small-squircle">
@@ -67,16 +82,13 @@
                     <button id="button-v" class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-v">Vowels</button>
                 </li>
                 <li class="nav-item">
-                    <button id="button-c1" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-c1">Consonants 1</button>
+                    <button id="button-c1" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-c1">Front Consonants</button>
                 </li>
                 <li class="nav-item">
-                    <button id="button-c2" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-c2">Consonants 2</button>
+                    <button id="button-c2" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-c2">Back Consonants</button>
                 </li>
                 <li class="nav-item">
                     <button id="button-misc" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-misc">Misc.</button>
-                </li>
-                <li class="nav-item">
-                    <button id="button-info" class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-info">Info</button>
                 </li>
             </ul>
 
@@ -96,7 +108,7 @@
                                 <th></th>
                                 <th colspan="2">
                                     Diacritics
-                                    <button class="info-button" onclick="openPopup()">ℹ️</button>
+                                    <span class="cursor-pointer" data-bs-toggle="modal" data-bs-target="#diacriticInfoModal">ℹ️</span>
                                 </th>
                             </tr>
                         </thead>
@@ -229,15 +241,6 @@
                             </tr>
                         </tbody>
                     </table>
-                    <!-- The Pop-up Container -->
-                    <div id="popup" class="popup">
-                        <div class="popup-content">
-                            <span class="close" onclick="closePopup()">&times;</span>
-                            <p>To type a character with a diacritic, simply press the button for the character, then press the button for the diacritic mark. For example, to type <span class="diacritic">ȧ</span>, press the <span class="diacritic">a</span> button, then press the <span class="diacritic">overdot</span> button.</p>
-                        </div>
-                    </div>
-                    <!-- Overlay for pop-up -->
-                    <div class="popup-overlay"></div>
                 </div>
 
                 <div id="pane-c1" class="tab-pane" role="tabpanel">
@@ -518,7 +521,7 @@
                                 <th colspan="2">Clicks</th>
                                 <th colspan="2">Suprasegmental</th>
                                 <th colspan="4">Tones and Word Accents</th>
-                                <th colspan="4">Diacritics for C</th>
+                                <th colspan="4">Other Diacritics</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -627,11 +630,6 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <div id="pane-info" class="tab-pane" role="tabpanel">
-                    To type a character with a diacritic, simply press the button for the character then press the button
-                    for the diacritic mark. e.g. to type a&#x0307, press the a button then press the overdot button.
                 </div>
             </div>
         </div>

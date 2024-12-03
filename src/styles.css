@@ -65,3 +65,7 @@
 .error {
     color: rgb(var(--bs-danger-rgb));
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}
