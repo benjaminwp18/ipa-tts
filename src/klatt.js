@@ -1,5 +1,7 @@
 let ctx = null;
 let audio_dst;
+let pitchMultiplier;
+let durationMultiplier;
 
 /**
  * Must be called before trying to use any other functions in this module.
@@ -51,7 +53,7 @@ class Nasal {
 
     makeParams() {
         let params = new KlattParam();
-        params.setMetadata(true, this.duration_ms / 1000);
+        params.setMetadata(true, this.duration_ms * durationMultiplier / 1000);
 
         const N = params.N_SAMP;
         let FF = params.FF;
@@ -166,7 +168,7 @@ class Fricative {
     makeParams() {
         let params = new KlattParam();
 
-        params.setMetadata(true, this.duration_ms / 1000);
+        params.setMetadata(true, this.duration_ms * durationMultiplier / 1000);
 
         const N = params.N_SAMP;
 
@@ -215,7 +217,7 @@ class Vocoid {
             throw new Error(`Cannot have more than ${FF.length} formants`);
         }
 
-        params.setMetadata(true, this.duration / 1000);
+        params.setMetadata(true, this.duration * durationMultiplier / 1000);
 
         params.AV.fill(this.AV);
         params.F0 = linearSequence(120, 70, N);
@@ -254,7 +256,7 @@ class Stop {
         fricative.AH = piecewiseLinearSequence([0, fricative.AH[0], fricative.AH[0], 0], fricative.AH.length);
 
         const closure = fricative.clone();
-        closure.setMetadata(true, this.closureMs / 1000);
+        closure.setMetadata(true, this.closureMs * durationMultiplier / 1000);
         closure.AV.fill(0);
         closure.AF.fill(0);
         closure.AH.fill(0);
@@ -1510,13 +1512,18 @@ const PHONES = {
     ),
 };
 
-const TONES = {
+const BASE_TONES = {
     "˥": 120,
     "˦": 105,
     "˧": 90,
     "˨": 75,
     "˩": 60,
 };
+
+
+function getTonePitch(grapheme) {
+    return BASE_TONES[grapheme] * pitchMultiplier;
+}
 
 const SPACE = new KlattParam();
 SPACE.setMetadata(true, 0.1);
@@ -1525,7 +1532,9 @@ SPACE.AV.fill(0);
 SPACE.AH.fill(0);
 SPACE.AB.fill(0);
 
-export function playPhrase(ctx, phrase) {
+export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplierInput) {
+    pitchMultiplier = pitchMultiplierInput;
+    durationMultiplier = durationMultiplierInput;
     let params = null;
     for (const word of phrase.split(" ")) {
         const wordParams = getWordParams(word);
@@ -1582,8 +1591,8 @@ function getWordParams(word) {
                 params.rampTo(lastPhoneParams, 0.02);
             }
         }
-        else if (TONES[grapheme] !== undefined) {
-            toneList.push(TONES[grapheme]);
+        else if (BASE_TONES[grapheme] !== undefined) {
+            toneList.push(getTonePitch(grapheme));
         }
     }
 
@@ -1602,7 +1611,7 @@ function getWordParams(word) {
 
     if (toneList.length === 0) {
         // Consistant F0 fall across whole word
-        params.F0 = linearSequence(120, 70, params.N_SAMP);
+        params.F0 = linearSequence(120 * pitchMultiplier, 70 * pitchMultiplier, params.N_SAMP);
     }
     else {
         console.warn(toneList);
