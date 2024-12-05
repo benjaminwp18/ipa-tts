@@ -1455,13 +1455,13 @@ const PHONES = {
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
 
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
-    "z": new Fricative().setAF(45).setAV(40).setAmp(6, 52),
+    "z": new Fricative(100).setAF(55).setAV(42).setAmp(6, 52),
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
     "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
     "f": new Fricative().setAF(60).setAV(0).setAB(57),
-    "v": new Fricative().setAF(50).setAV(50).setAB(57),
+    "v": new Fricative(120).setAF(55).setAV(50).setAB(65),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
-    "ð": new Fricative().setAF(55).setAV(35).setAmp(6, 27).setAB(48),
+    "ð": new Fricative().setAF(35).setAV(45).setAmp(6, 27).setAB(85),
 
     "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
     "ɹ": new Approximant([310, 1060, 1380], [70, 100, 120]),
