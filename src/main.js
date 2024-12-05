@@ -10,6 +10,8 @@ export function main() {
 	let spectrogram = new Spectrogram(ctx, document.getElementById("spectrogram"));
 	Klatt.init(ctx, spectrogram.analyzerNode);
 
+	let copyButton = document.getElementById("copy-button");
+	let ipaOutput = document.getElementById("ipa-text-output");
 	let soundButton = document.getElementById("make-sound-button");
 	let ipaTextField = document.getElementById("ipa-text-input");
 	let pitchSlider = document.getElementById("pitchRange");
@@ -17,6 +19,10 @@ export function main() {
 
 	spectrogram.start();
 	// Klatt.playPhrase(ctx, "");
+
+	copyButton.addEventListener("click", function () {
+		ipaTextField.value = ipaOutput.value;
+	});
 
 	soundButton.addEventListener("click", function (e) {
 		e.preventDefault();
