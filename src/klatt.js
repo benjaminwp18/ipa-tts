@@ -1426,6 +1426,7 @@ const REPLACEMENTS = {
 const PHONES = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
     "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
+    "ɝ": new Monophthong([310, 1060, 1380], [70, 100, 120]), // TODO: this is the same as ɚ for now
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
     "ɛ": new Monophthong([530, 1680, 2500], [60, 90, 200]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
@@ -1464,6 +1465,7 @@ const PHONES = {
     "ð": new Fricative().setAF(35).setAV(45).setAmp(6, 27).setAB(85),
 
     "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
+    "ɫ": new Approximant([310, 1050, 2880], [50, 100, 280]),
     "ɹ": new Approximant([310, 1060, 1380], [70, 100, 120]),
     "w": new Approximant([290, 610, 2150], [50, 80, 60]),
     "j": new Approximant([260, 2070, 3020], [40, 250, 500]),
@@ -1507,6 +1509,10 @@ const PHONES = {
         120, 100
     ),
     "g": new Stop(
+        new Fricative(25).setAF(53).setAV(47).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
+        10, 90
+    ),
+    "ɡ": new Stop(
         new Fricative(25).setAF(53).setAV(47).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
         10, 90
     ),
