@@ -1525,12 +1525,16 @@ function getTonePitch(grapheme) {
     return BASE_TONES[grapheme] * pitchMultiplier;
 }
 
-const SPACE = new KlattParam();
-SPACE.setMetadata(true, 0.1);
+let SPACE = new KlattParam();
 SPACE.AF.fill(0);
 SPACE.AV.fill(0);
 SPACE.AH.fill(0);
 SPACE.AB.fill(0);
+
+function getSpace() {
+    SPACE.setMetadata(true, 0.1 * durationMultiplier);
+    return SPACE;
+}
 
 export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplierInput) {
     pitchMultiplier = pitchMultiplierInput;
@@ -1542,7 +1546,7 @@ export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplier
             params = wordParams;
         }
         else {
-            params.append(SPACE).append(wordParams);
+            params.append(getSpace()).append(wordParams);
         }
     }
 
