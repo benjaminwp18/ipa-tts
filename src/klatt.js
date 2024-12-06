@@ -1522,7 +1522,7 @@ const PHONES = {
         85, 90
     ),
     "d": new Stop(
-        new Fricative(15).setAF(53).setAV(47).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
+        new Fricative(30).setAF(36).setAV(50).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
         10, 90
     ),
     "p": new Stop(
@@ -1530,15 +1530,15 @@ const PHONES = {
         120, 90
     ),
     "b": new Stop(
-        new Fricative(10).setAF(63).setAV(47).setAH(0).setAB(63),
+        new Fricative(10).setAF(55).setAV(54).setAH(0).setAB(63),
         10, 90
     ),
     "k": new Stop(
-        new Fricative(65).setAF(49).setAV(0).setAH(58).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
+        new Fricative(55).setAF(49).setAV(0).setAH(58).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
         120, 100
     ),
     "ɡ": new Stop(
-        new Fricative(25).setAF(53).setAV(47).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
+        new Fricative(25).setAF(45).setAV(53).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
         10, 90
     )
 };
