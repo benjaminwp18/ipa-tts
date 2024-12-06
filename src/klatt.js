@@ -1504,7 +1504,7 @@ const PHONES = {
     "h": new Fricative().setAF(0).setAV(0).setAH(105),
 
     // Nasals
-    "m": new Nasal([250, 1200, 2200], [60, 80, 150]),
+    "m": new Nasal([200, 1200, 2200], [60, 80, 150]),
     "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140]),
     "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160]),
     "n": new Nasal([150, 1500, 2600], [50, 70, 140]),//.setFNP(350).setBNP(100).setFNZ(170).setBNZ(100),
