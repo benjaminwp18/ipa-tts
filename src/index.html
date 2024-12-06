@@ -53,7 +53,10 @@
                         <input class="form-control" autocomplete="off" placeholder="Enter text" id="text"/>
                         <button class="btn btn-primary" type="submit" id="search-button">Search</button>
                     </div>
-                    <input class="form-control" readonly placeholder="Output IPA" id="ipa-text-output"/>
+                    <div class="input-group mb-3">
+                        <input class="form-control" readonly placeholder="Output IPA" id="ipa-text-output"/>
+                        <button class="btn btn-primary" id="copy-button">→</button>
+                    </div>
                     <p class="error mt-2 opacity-0" id="language-selection-warning">Success!</p>
                 </form>
             </div>

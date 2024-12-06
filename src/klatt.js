@@ -1418,14 +1418,16 @@ class Switch extends KlattComponent {
     }
 }
 
-// Some chars have multiple identical-looking unicode values
+// Some chars have multiple identical-looking (or similar) unicode values
 const REPLACEMENTS = {
-    "ε": "ɛ"  // Greek epsilon -> Latin epsilon
+    "ε": "ɛ",  // Greek epsilon -> Latin epsilon
+    "g": "ɡ",  // U+0067 -> U+0261
 }
 
 const PHONES = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
     "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
+    "ɝ": new Monophthong([310, 1060, 1380], [70, 100, 120]), // TODO: distinguish from ɚ
     "ɪ": new Monophthong([400, 1900, 2570], [50, 100, 140]),
     "ɛ": new Monophthong([530, 1680, 2500], [60, 90, 200]),
     "æ": new Monophthong([700, 1560, 2430], [70, 130, 320]),
@@ -1455,15 +1457,16 @@ const PHONES = {
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
 
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
-    "z": new Fricative().setAF(45).setAV(40).setAmp(6, 52),
+    "z": new Fricative(100).setAF(55).setAV(42).setAmp(6, 52),
     "ʃ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
     "ʒ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
     "f": new Fricative().setAF(60).setAV(0).setAB(57),
-    "v": new Fricative().setAF(50).setAV(50).setAB(57),
+    "v": new Fricative(120).setAF(55).setAV(50).setAB(65),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
-    "ð": new Fricative().setAF(55).setAV(35).setAmp(6, 27).setAB(48),
+    "ð": new Fricative().setAF(35).setAV(45).setAmp(6, 27).setAB(85),
 
     "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
+    "ɫ": new Approximant([310, 1050, 2880], [50, 100, 280]), // TODO: distinguish from l?
     "ɹ": new Approximant([310, 1060, 1380], [70, 100, 120]),
     "w": new Approximant([290, 610, 2150], [50, 80, 60]),
     "j": new Approximant([260, 2070, 3020], [40, 250, 500]),
@@ -1506,10 +1509,10 @@ const PHONES = {
         new Fricative(65).setAF(49).setAV(0).setAH(58).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
         120, 100
     ),
-    "g": new Stop(
+    "ɡ": new Stop(
         new Fricative(25).setAF(53).setAV(47).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
         10, 90
-    ),
+    )
 };
 
 const BASE_TONES = {
@@ -1525,12 +1528,16 @@ function getTonePitch(grapheme) {
     return BASE_TONES[grapheme] * pitchMultiplier;
 }
 
-const SPACE = new KlattParam();
-SPACE.setMetadata(true, 0.1);
+let SPACE = new KlattParam();
 SPACE.AF.fill(0);
 SPACE.AV.fill(0);
 SPACE.AH.fill(0);
 SPACE.AB.fill(0);
+
+function getSpace() {
+    SPACE.setMetadata(true, 0.1 * durationMultiplier);
+    return SPACE;
+}
 
 export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplierInput) {
     pitchMultiplier = pitchMultiplierInput;
@@ -1542,7 +1549,7 @@ export function playPhrase(ctx, phrase, pitchMultiplierInput, durationMultiplier
             params = wordParams;
         }
         else {
-            params.append(SPACE).append(wordParams);
+            params.append(getSpace()).append(wordParams);
         }
     }
 
