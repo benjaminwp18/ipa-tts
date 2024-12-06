@@ -20,7 +20,7 @@ export function init(context, dst_node = null) {
 }
 
 class Nasal {
-    constructor(formantFreqs, bandwidths, antiformants, duration_ms = 150) {
+    constructor(formantFreqs, bandwidths, durationMs = 150) {
         if (formantFreqs.length !== bandwidths.length) {
             throw new Error(
                 `Number of formant frequencies (${formantFreqs.length}) and bandwidths (${bandwidths.length}) must match.`
@@ -29,11 +29,13 @@ class Nasal {
 
         this.formantFreqs = formantFreqs;
         this.bandwidths = bandwidths;
-        this.antiformants = antiformants;
-        this.duration_ms = duration_ms;
-        this.AV = 60;
-        this.AN = 40;
-        this.AF = 0;
+        this.durationMs = durationMs;
+        this.FNP = undefined;
+        this.BNP = undefined;
+        this.FNZ = undefined;
+        this.BNZ = undefined;
+        this.AV = 50;
+        this.AN = 50;
     }
 
     setAV(AV) {
@@ -46,29 +48,42 @@ class Nasal {
         return this;
     }
 
-    setDuration(duration_ms) {
-        this.duration_ms = duration_ms;
+    setFNP(FNP) {
+        this.FNP = FNP;
+        return this;
+    }
+
+    setBNP(BNP) {
+        this.BNP = BNP;
+        return this;
+    }
+
+    setFNZ(FNZ) {
+        this.FNZ = FNZ;
+        return this;
+    }
+
+    setBNZ(BNZ) {
+        this.BNZ = BNZ;
+        return this;
+    }
+
+    setDuration(durationMs) {
+        this.durationMs = durationMs;
         return this;
     }
 
     makeParams() {
         let params = new KlattParam();
-        params.setMetadata(true, this.duration_ms * durationMultiplier / 1000);
+        params.setMetadata(true, this.durationMs / 1000);
 
         const N = params.N_SAMP;
         let FF = params.FF;
         let BW = params.BW;
-        let AF = params.AN;
 
         if (FF.length < this.formantFreqs.length || BW.length < this.bandwidths.length) {
             throw new Error(
                 `Insufficient formant slots in KlattParam (supports ${FF.length} formants).`
-            );
-        }
-
-        if (AF.length < this.antiformants.length) {
-            throw new Error(
-                `Insufficient antiformant slots in KlattParam (supports ${AF.length} antiformants).`
             );
         }
 
@@ -79,12 +94,22 @@ class Nasal {
             BW[i] = Array(N).fill(this.bandwidths[i]);
         }
 
-        for (let i = 0; i < this.antiformants.length; i++) {
-            AF[i] = Array(N).fill(this.antiformants[i]);
-        }
+        params.AF.fill(0);
+        params.AV.fill(this.AV);
+        params.AN.fill(this.AN);
 
-        params.AV = Array(N).fill(this.AV);
-        params.AN = Array(N).fill(this.AN);
+        if (this.FNP !== undefined) {
+            params.FNP.fill(this.FNP);
+        }
+        if (this.BNP !== undefined) {
+            params.BNP.fill(this.BNP);
+        }
+        if (this.FNZ !== undefined) {
+            params.FNZ.fill(this.FNZ);
+        }
+        if (this.BNZ !== undefined) {
+            params.BNZ.fill(this.BNZ);
+        }
 
         return params;
     }
@@ -1424,7 +1449,7 @@ const REPLACEMENTS = {
     "g": "ɡ",  // U+0067 -> U+0261
 }
 
-const PHONES = {
+const VOWELS = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
     "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
     "ɝ": new Monophthong([310, 1060, 1380], [70, 100, 120]), // TODO: distinguish from ɚ
@@ -1434,27 +1459,31 @@ const PHONES = {
     "ɑ": new Monophthong([700, 1220, 2600], [130, 70, 160]),
     "ʊ": new Monophthong([400, 890, 2100], [50, 100, 80]),
     "ʌ": new Monophthong([700, 1220, 2570], [70, 50, 140]),
+    "ə": new Monophthong([650, 1280, 2570], [70, 50, 140]),
     "a": new Monophthong([650, 1210, 2550], [90, 70, 160]),
     "ɒ": new Monophthong([620, 850, 2570], [70, 50, 140]),
-    "ə": new Monophthong([460, 1400, 2570], [90, 110, 80]),
     "y": new Monophthong([270, 2050, 2400], [40, 100, 200]),
     "ɨ": new Monophthong([320, 1700, 2300], [60, 120, 300]),
     "ʉ": new Monophthong([320, 1600, 2400], [50, 100, 250]),
     "ɯ": new Monophthong([320, 1300, 2200], [60, 110, 180]),
-    "u": new Monophthong([300, 870, 2240], [50, 90, 180]),
     "ʏ": new Monophthong([310, 1690, 2340], [40, 80, 130]),
     "e": new Monophthong([500, 1800, 2600], [60, 110, 300]),
     "ø": new Monophthong([450, 1600, 2400], [60, 100, 200]),
     "ɘ": new Monophthong([470, 1400, 2400], [70, 130, 210]),
     "ɵ": new Monophthong([450, 1200, 2200], [70, 110, 200]),
     "ɤ": new Monophthong([460, 1300, 2200], [80, 110, 180]),
-    "o": new Monophthong([340, 800, 2300], [70, 80, 200]),
+    "o": new Monophthong([350, 600, 2100], [70, 80, 200]),
+    "u": new Monophthong([300, 870, 2240], [50, 90, 180]),
     "œ": new Monophthong([550, 1500, 2400], [70, 120, 200]),
     "ɜ": new Monophthong([550, 1400, 2400], [80, 110, 200]),
     "ɞ": new Monophthong([540, 1300, 2200], [80, 110, 200]),
     "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
     "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
+};
+
+const PHONES = {
+    ...VOWELS,
 
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
     "z": new Fricative(100).setAF(55).setAV(42).setAmp(6, 52),
@@ -1475,14 +1504,13 @@ const PHONES = {
     "h": new Fricative().setAF(0).setAV(0).setAH(105),
 
     // Nasals
-    "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
-    "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140], [450, 1300]),
-    "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160], [400, 1300]),
-    // TODO: N sounds needs work
-    "n": new Nasal([300, 1600, 2400], [50, 70, 140], [750, 1750]),
-    "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150], [650, 1650]),
-    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170], [850, 1850]),
-    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140], [650, 1550]),
+    "m": new Nasal([200, 1200, 2200], [60, 80, 150]),
+    "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140]),
+    "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160]),
+    "n": new Nasal([150, 1500, 2600], [50, 70, 140]),//.setFNP(350).setBNP(100).setFNZ(170).setBNZ(100),
+    "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150]),
+    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170]),
+    "ŋ": new Nasal([200, 1300, 2200], [50, 80, 140]),
 
     // Stops
     // TODO: blended aspiration with following vowels
@@ -1494,7 +1522,7 @@ const PHONES = {
         85, 90
     ),
     "d": new Stop(
-        new Fricative(15).setAF(53).setAV(47).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
+        new Fricative(30).setAF(36).setAV(50).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
         10, 90
     ),
     "p": new Stop(
@@ -1502,15 +1530,15 @@ const PHONES = {
         120, 90
     ),
     "b": new Stop(
-        new Fricative(10).setAF(63).setAV(47).setAH(0).setAB(63),
+        new Fricative(10).setAF(55).setAV(54).setAH(0).setAB(63),
         10, 90
     ),
     "k": new Stop(
-        new Fricative(65).setAF(49).setAV(0).setAH(58).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
+        new Fricative(55).setAF(49).setAV(0).setAH(58).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
         120, 100
     ),
     "ɡ": new Stop(
-        new Fricative(25).setAF(53).setAV(47).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
+        new Fricative(25).setAF(45).setAV(53).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
         10, 90
     )
 };
@@ -1571,17 +1599,30 @@ function getWordParams(word) {
         // Converts ə˞  to ɚ ("rrrrr")
         // TODO: do a single sweep through the whole string to create
         //       grapheme objects with properties describing their diacritics
-        if (grapheme === "ə" && i < word.length - 1 && word[i+1] === "˞") {
+        if (grapheme === "ə" && i < word.length - 1 && word[i + 1] === "˞") {
             grapheme = "ɚ";
             i++;
         }
 
         let phone = PHONES[grapheme]
         if (phone !== undefined) {
+            if (VOWELS[grapheme] !== undefined && i < word.length - 1 && VOWELS[word[i + 1]] !== undefined) {
+                // Automatically create dipthong from adjacent vowel pairs
+                const vowel1 = VOWELS[grapheme].makeParams();
+                const vowel2 = VOWELS[word[i + 1]].makeParams();
+                vowel1.setMetadata(true, 50 * durationMultiplier / 1000);
+                vowel2.setMetadata(true, 50 * durationMultiplier / 1000);
+                i++;
+
+                lastPhoneParams = vowel1.rampTo(vowel2, 400 * durationMultiplier / 1000);
+            }
+            else {
+                // Otherwise, make a normal phone
+                lastPhoneParams = phone.makeParams();
+            }
+
             // Fade in on first phone
             if (params === null) {
-                lastPhoneParams = phone.makeParams();
-
                 // Create "stub" params w/the same values,
                 //  just shorter & w/amplitudes of 0
                 params = lastPhoneParams.clone();
@@ -1594,7 +1635,6 @@ function getWordParams(word) {
                 params.rampTo(lastPhoneParams, 0.05);
             }
             else {
-                lastPhoneParams = phone.makeParams();
                 params.rampTo(lastPhoneParams, 0.02);
             }
         }
