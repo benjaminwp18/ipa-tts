@@ -1424,7 +1424,7 @@ const REPLACEMENTS = {
     "g": "ɡ",  // U+0067 -> U+0261
 }
 
-const PHONES = {
+const VOWELS = {
     "i": new Monophthong([310, 2020, 2960], [45, 200, 400]),
     "ɚ": new Monophthong([310, 1060, 1380], [70, 100, 120]),
     "ɝ": new Monophthong([310, 1060, 1380], [70, 100, 120]), // TODO: distinguish from ɚ
@@ -1448,13 +1448,17 @@ const PHONES = {
     "ɘ": new Monophthong([470, 1400, 2400], [70, 130, 210]),
     "ɵ": new Monophthong([450, 1200, 2200], [70, 110, 200]),
     "ɤ": new Monophthong([460, 1300, 2200], [80, 110, 180]),
-    "o": new Monophthong([340, 800, 2300], [70, 80, 200]),
+    "o": new Monophthong([400, 600, 2300], [70, 80, 200]),
     "œ": new Monophthong([550, 1500, 2400], [70, 120, 200]),
     "ɜ": new Monophthong([550, 1400, 2400], [80, 110, 200]),
     "ɞ": new Monophthong([540, 1300, 2200], [80, 110, 200]),
     "ɔ": new Monophthong([500, 900, 2400], [70, 80, 200]),
     "ɐ": new Monophthong([600, 1200, 2400], [80, 100, 220]),
     "ɶ": new Monophthong([650, 1400, 2500], [90, 120, 250]),
+};
+
+const PHONES = {
+    ...VOWELS,
 
     "s": new Fricative().setAF(60).setAV(0).setAmp(6, 52),
     "z": new Fricative(100).setAF(55).setAV(42).setAmp(6, 52),
@@ -1571,17 +1575,30 @@ function getWordParams(word) {
         // Converts ə˞  to ɚ ("rrrrr")
         // TODO: do a single sweep through the whole string to create
         //       grapheme objects with properties describing their diacritics
-        if (grapheme === "ə" && i < word.length - 1 && word[i+1] === "˞") {
+        if (grapheme === "ə" && i < word.length - 1 && word[i + 1] === "˞") {
             grapheme = "ɚ";
             i++;
         }
 
         let phone = PHONES[grapheme]
         if (phone !== undefined) {
+            if (VOWELS[grapheme] !== undefined && i < word.length - 1 && VOWELS[word[i + 1]] !== undefined) {
+                // Automatically create dipthong from adjacent vowel pairs
+                const vowel1 = VOWELS[grapheme].makeParams();
+                const vowel2 = VOWELS[word[i + 1]].makeParams();
+                vowel1.setMetadata(true, 50 * durationMultiplier / 1000);
+                vowel2.setMetadata(true, 50 * durationMultiplier / 1000);
+                i++;
+
+                lastPhoneParams = vowel1.rampTo(vowel2, 400 * durationMultiplier / 1000);
+            }
+            else {
+                // Otherwise, make a normal phone
+                lastPhoneParams = phone.makeParams();
+            }
+
             // Fade in on first phone
             if (params === null) {
-                lastPhoneParams = phone.makeParams();
-
                 // Create "stub" params w/the same values,
                 //  just shorter & w/amplitudes of 0
                 params = lastPhoneParams.clone();
@@ -1594,7 +1611,6 @@ function getWordParams(word) {
                 params.rampTo(lastPhoneParams, 0.05);
             }
             else {
-                lastPhoneParams = phone.makeParams();
                 params.rampTo(lastPhoneParams, 0.02);
             }
         }
