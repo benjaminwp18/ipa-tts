@@ -34,8 +34,8 @@ class Nasal {
         this.BNP = undefined;
         this.FNZ = undefined;
         this.BNZ = undefined;
-        this.AV = 40;
-        this.AN = 40;
+        this.AV = 50;
+        this.AN = 50;
     }
 
     setAV(AV) {
