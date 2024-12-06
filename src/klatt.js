@@ -1510,7 +1510,7 @@ const PHONES = {
     "n": new Nasal([150, 1500, 2600], [50, 70, 140]),//.setFNP(350).setBNP(100).setFNZ(170).setBNZ(100),
     "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150]),
     "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170]),
-    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140]),
+    "ŋ": new Nasal([200, 1300, 2200], [50, 80, 140]),
 
     // Stops
     // TODO: blended aspiration with following vowels
