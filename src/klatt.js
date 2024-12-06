@@ -20,7 +20,7 @@ export function init(context, dst_node = null) {
 }
 
 class Nasal {
-    constructor(formantFreqs, bandwidths, antiformants, duration_ms = 150) {
+    constructor(formantFreqs, bandwidths, durationMs = 150) {
         if (formantFreqs.length !== bandwidths.length) {
             throw new Error(
                 `Number of formant frequencies (${formantFreqs.length}) and bandwidths (${bandwidths.length}) must match.`
@@ -29,11 +29,13 @@ class Nasal {
 
         this.formantFreqs = formantFreqs;
         this.bandwidths = bandwidths;
-        this.antiformants = antiformants;
-        this.duration_ms = duration_ms;
-        this.AV = 60;
+        this.durationMs = durationMs;
+        this.FNP = undefined;
+        this.BNP = undefined;
+        this.FNZ = undefined;
+        this.BNZ = undefined;
+        this.AV = 40;
         this.AN = 40;
-        this.AF = 0;
     }
 
     setAV(AV) {
@@ -46,29 +48,42 @@ class Nasal {
         return this;
     }
 
-    setDuration(duration_ms) {
-        this.duration_ms = duration_ms;
+    setFNP(FNP) {
+        this.FNP = FNP;
+        return this;
+    }
+
+    setBNP(BNP) {
+        this.BNP = BNP;
+        return this;
+    }
+
+    setFNZ(FNZ) {
+        this.FNZ = FNZ;
+        return this;
+    }
+
+    setBNZ(BNZ) {
+        this.BNZ = BNZ;
+        return this;
+    }
+
+    setDuration(durationMs) {
+        this.durationMs = durationMs;
         return this;
     }
 
     makeParams() {
         let params = new KlattParam();
-        params.setMetadata(true, this.duration_ms * durationMultiplier / 1000);
+        params.setMetadata(true, this.durationMs / 1000);
 
         const N = params.N_SAMP;
         let FF = params.FF;
         let BW = params.BW;
-        let AF = params.AN;
 
         if (FF.length < this.formantFreqs.length || BW.length < this.bandwidths.length) {
             throw new Error(
                 `Insufficient formant slots in KlattParam (supports ${FF.length} formants).`
-            );
-        }
-
-        if (AF.length < this.antiformants.length) {
-            throw new Error(
-                `Insufficient antiformant slots in KlattParam (supports ${AF.length} antiformants).`
             );
         }
 
@@ -79,12 +94,22 @@ class Nasal {
             BW[i] = Array(N).fill(this.bandwidths[i]);
         }
 
-        for (let i = 0; i < this.antiformants.length; i++) {
-            AF[i] = Array(N).fill(this.antiformants[i]);
-        }
+        params.AF.fill(0);
+        params.AV.fill(this.AV);
+        params.AN.fill(this.AN);
 
-        params.AV = Array(N).fill(this.AV);
-        params.AN = Array(N).fill(this.AN);
+        if (this.FNP !== undefined) {
+            params.FNP.fill(this.FNP);
+        }
+        if (this.BNP !== undefined) {
+            params.BNP.fill(this.BNP);
+        }
+        if (this.FNZ !== undefined) {
+            params.FNZ.fill(this.FNZ);
+        }
+        if (this.BNZ !== undefined) {
+            params.BNZ.fill(this.BNZ);
+        }
 
         return params;
     }
@@ -1479,14 +1504,13 @@ const PHONES = {
     "h": new Fricative().setAF(0).setAV(0).setAH(105),
 
     // Nasals
-    "m": new Nasal([250, 1200, 2200], [60, 80, 150], [500, 1500]),
-    "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140], [450, 1300]),
-    "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160], [400, 1300]),
-    // TODO: N sounds needs work
-    "n": new Nasal([300, 1600, 2400], [50, 70, 140], [750, 1750]),
-    "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150], [650, 1650]),
-    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170], [850, 1850]),
-    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140], [650, 1550]),
+    "m": new Nasal([250, 1200, 2200], [60, 80, 150]),
+    "ɱ": new Nasal([250, 1100, 2000], [60, 90, 140]),
+    "ɴ": new Nasal([200, 1100, 2000], [70, 100, 160]),
+    "n": new Nasal([150, 1500, 2600], [50, 70, 140]),//.setFNP(350).setBNP(100).setFNZ(170).setBNZ(100),
+    "ɳ": new Nasal([250, 1500, 2300], [50, 90, 150]),
+    "ɲ": new Nasal([300, 2000, 2500], [50, 100, 170]),
+    "ŋ": new Nasal([300, 1300, 2200], [50, 80, 140]),
 
     // Stops
     // TODO: blended aspiration with following vowels
