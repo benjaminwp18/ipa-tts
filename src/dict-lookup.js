@@ -49,7 +49,7 @@ function findEntries(phrase) {
     let words = [];
     if (LOGOGRAPHIES.includes(currentLang)) {
         // ...lookup character-based langs by char
-        words = formattedPhrase.split("");
+        words = formattedPhrase.replace(NON_ALPHABET_REGEX, "").split("");
     }
     else {
         // ...lookup other langs by word
@@ -62,6 +62,7 @@ function findEntries(phrase) {
         const entry = currentDict.find(e => e.word === word);
         entry ? entries.push(entry) : entries.push({ word: word, ipa: null });
     });
+
     return entries;
 }
 
