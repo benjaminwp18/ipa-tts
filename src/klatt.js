@@ -1493,6 +1493,7 @@ const PHONES = {
     "v": new Fricative(120).setAF(55).setAV(50).setAB(65),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(35).setAV(45).setAmp(6, 27).setAB(85),
+    "ç": new Fricative().setAF(55).setAV(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
 
     "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
     "ɫ": new Approximant([310, 1050, 2880], [50, 100, 280]), // TODO: distinguish from l?
