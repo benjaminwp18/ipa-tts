@@ -1540,7 +1540,20 @@ const PHONES = {
     "ɡ": new Stop(
         new Fricative(25).setAF(45).setAV(53).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
         10, 90
-    )
+    ),
+
+    // Fake retroflex consonants that copy (post)alveolar consonant params
+    // Added for Mandarin playback; TODO: find actual params for these
+    "ʈ": new Stop(
+        new Fricative(40).setAF(53).setAV(0).setAH(58).setAmps([3, 4, 5, 6], [30, 45, 57, 63]),
+        85, 90
+    ),
+    "ɖ": new Stop(
+        new Fricative(30).setAF(36).setAV(50).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
+        10, 90
+    ),
+    "ʂ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
+    "ʐ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
 };
 
 const BASE_TONES = {
