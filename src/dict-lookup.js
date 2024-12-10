@@ -2,6 +2,12 @@
 // \p{M} matches character intended to be combined with another char (e.g. accents)
 const NON_ALPHABET_REGEX = /[^\p{L}|\p{M}]+/ugm; // TODO: include hyphen? apostrophe?
 
+// Writing systems that should be split by char for lookup, not by spaces
+const LOGOGRAPHIES = [
+    "zh_hans",  // Simplified Chinese
+    "zh_hant"   // Traditional Chinese
+];
+
 let currentLang;
 let currentDict;
 
@@ -39,15 +45,24 @@ function findEntries(phrase) {
     if (entry)
         return [entry];
 
-    // if that doesn't work, try splitting phrase
-    const words = formattedPhrase
-        .split(NON_ALPHABET_REGEX)
-        .filter(Boolean); // remove empty strings
+    // if that doesn't work...
+    let words = [];
+    if (LOGOGRAPHIES.includes(currentLang)) {
+        // ...lookup character-based langs by char
+        words = formattedPhrase.replace(NON_ALPHABET_REGEX, "").split("");
+    }
+    else {
+        // ...lookup other langs by word
+        words = formattedPhrase.split(NON_ALPHABET_REGEX)
+    }
+
+    words = words.filter(Boolean);  // remove empty strings
     let entries = [];
     words.forEach(word => {
         const entry = currentDict.find(e => e.word === word);
         entry ? entries.push(entry) : entries.push({ word: word, ipa: null });
     });
+
     return entries;
 }
 

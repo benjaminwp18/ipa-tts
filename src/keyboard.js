@@ -9,6 +9,12 @@ for (let key of allKeys) {
 // function called by keyboard keys to type in linked text area
 function keyType(evt) {
     let content = linkedTextArea.value;
-    content += evt.currentTarget.innerText;
+    const selStart = linkedTextArea.selectionStart;
+    const selEnd = linkedTextArea.selectionEnd;
+    const keyChar = evt.currentTarget.innerText;
+
+    content = content.slice(0, selStart) + keyChar + content.slice(selEnd);
     linkedTextArea.value = content;
+    linkedTextArea.focus();
+    linkedTextArea.setSelectionRange(selStart + 1, selStart + 1);
 }

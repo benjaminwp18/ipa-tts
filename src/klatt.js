@@ -1493,6 +1493,7 @@ const PHONES = {
     "v": new Fricative(120).setAF(55).setAV(50).setAB(65),
     "θ": new Fricative().setAF(65).setAV(0).setAmps([2, 6], [13, 29]).setAB(48),
     "ð": new Fricative().setAF(35).setAV(45).setAmp(6, 27).setAB(85),
+    "ç": new Fricative().setAF(55).setAV(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 55, 27]),
 
     "l": new Approximant([310, 1050, 2880], [50, 100, 280]),
     "ɫ": new Approximant([310, 1050, 2880], [50, 100, 280]), // TODO: distinguish from l?
@@ -1540,7 +1541,20 @@ const PHONES = {
     "ɡ": new Stop(
         new Fricative(25).setAF(45).setAV(53).setAH(0).setAmps([2, 3, 4, 5, 6], [54, 53, 43, 43, 32]),
         10, 90
-    )
+    ),
+
+    // Fake retroflex consonants that copy (post)alveolar consonant params
+    // Added for Mandarin playback; TODO: find actual params for these
+    "ʈ": new Stop(
+        new Fricative(40).setAF(53).setAV(0).setAH(58).setAmps([3, 4, 5, 6], [30, 45, 57, 63]),
+        85, 90
+    ),
+    "ɖ": new Stop(
+        new Fricative(30).setAF(36).setAV(50).setAH(0).setAmps([3, 4, 5, 6], [47, 60, 62, 60]),
+        10, 90
+    ),
+    "ʂ": new Fricative(185).setAF(55).setAV(0).setAmps([3, 4, 5, 6], [57, 48, 48, 46]),
+    "ʐ": new Fricative().setAF(53).setAV(47).setAmps([2, 3, 4, 5, 6], [48, 48, 48, 41, 53]),
 };
 
 const BASE_TONES = {
